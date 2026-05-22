@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OP 推廣遊戲表設定</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #f5f5f5;
+      --line: #e0e0e0;
+      --text: #11151d;
+      --muted: #757575;
+      --primary: #1e8db8;
+      --success: #22c55e;
+      --error: #ef4444;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+      background: #ffffff;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app { max-width: 1600px; margin: 0 auto; display: grid; gap: 18px; }
+    .hero { background: #ffffff; border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: var(--radius); padding: 24px; display: grid; gap: 12px; }
+    .hero h1 { margin: 0; font-size: 32px; line-height: 1.08; color: var(--text); }
+    .hero p { margin: 0; color: var(--muted); line-height: 1.7; font-size: 14px; }
+    .hero-link { display: inline-block; margin-top: 8px; padding: 8px 12px; background: transparent; border: 1px solid var(--primary); border-radius: 4px; color: var(--primary); text-decoration: none; font-size: 13px; }
+    .hero-link:hover { background: rgba(30, 141, 184, 0.05); }
+
+    .tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px; }
+    .tab-btn { background: none; border: none; color: var(--muted); padding: 12px 16px; cursor: pointer; font-size: 15px; transition: 0.2s; }
+    .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .container { display: grid; grid-template-columns: 340px 1fr; gap: 18px; }
+    .panel { background: #ffffff; border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: var(--radius); padding: 18px; }
+    .panel h2 { margin: 0 0 12px; font-size: 18px; }
+
+    .box { display: grid; gap: 10px; padding: 14px; border-radius: 8px; border: 1px solid var(--line); background: #f9f9f9; }
+    .box strong { display: block; margin-bottom: 8px; }
+
+    button {
+      border: 1px solid var(--line);
+      background: #f5f5f5;
+      color: var(--text);
+      border-radius: 4px;
+      padding: 8px 16px;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    button:hover { background: #eeeeee; }
+    .primary { background: var(--primary); border-color: var(--primary); color: #ffffff; font-weight: 600; }
+    .primary:hover { background: #1a7a9e; }
+    .ghost { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+    .ghost:hover { background: rgba(30, 141, 184, 0.05); }
+
+    .field-value {
+      padding: 10px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+      background: #f9f9f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .select-btn { width: 100%; text-align: left; padding: 10px 12px; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; }
+
+    .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); cursor: pointer; user-select: none; }
+    .checkbox-item input { accent-color: var(--primary); }
+
+    .game-types-section { display: grid; gap: 14px; }
+    .game-type-group { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: rgba(255,255,255,0.02); }
+    .game-type-name { font-weight: 700; margin-bottom: 8px; font-size: 14px; color: var(--primary); }
+    .table-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; }
+    .table-checkbox { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+
+    .selected-tables {
+      min-height: 60px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+    }
+    .table-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(124, 58, 237, 0.2);
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      user-select: none;
+      cursor: grab;
+      font-size: 13px;
+    }
+    .table-chip[draggable="true"]:active { cursor: grabbing; }
+    .table-chip.dragging { opacity: 0.45; }
+    .table-chip .close {
+      width: 16px;
+      height: 16px;
+      border: 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .config-list { display: grid; gap: 8px; }
+    .config-item {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .config-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(124, 58, 237, 0.4); }
+    .config-name { font-weight: 600; }
+    .config-delete { background: rgba(239, 68, 68, 0.2); border: none; color: #fca5a5; padding: 6px 10px; font-size: 12px; }
+
+    .search-section { display: grid; gap: 12px; margin-bottom: 18px; }
+    .search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .search-select {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .results-grid { display: grid; gap: 12px; }
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255,255,255,0.02);
+    }
+    .result-header { display: grid; grid-template-columns: 80px 100px 1fr; gap: 12px; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .result-label { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+    .result-value { font-weight: 600; }
+    .result-tables { display: flex; flex-wrap: wrap; gap: 8px; }
+    .result-table { padding: 6px 10px; border-radius: 8px; background: rgba(124, 58, 237, 0.2); border: 1px solid rgba(124, 58, 237, 0.4); font-size: 12px; }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .toolbar { display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 12px; }
+
+    .error-text { color: var(--error); font-size: 12px; display: none; }
+  </style>
+</head>
+<body>
+  <div style="padding:8px 24px; background:#f0f0f0; border-bottom:1px solid #e0e0e0; font-size:12px; color:#666;">ENV: Staging</div>
+  <div class="app">
+    <section class="hero">
+      <h1>Game Group › 推廣遊戲表設定</h1>
+    </section>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('view')">推廣遊戲列表</button>
+      <button class="tab-btn" onclick="switchTab('add')">新增推廣遊戲表</button>
+    </div>
+
+    <!-- TAB 1: 查看 -->
+    <div id="view" class="tab-content" style="display:grid;">
+      <div class="panel">
+        <h2>搜尋結果</h2>
+
+        <div class="search-section">
+          <div class="search-row">
+            <div>
+              <label style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">幣別</label>
+              <select class="search-select" id="currencyFilter" onchange="applyFilters()">
+                <option value="">全部</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">Website</label>
+              <select class="search-select" id="websiteFilter" onchange="applyFilters()">
+                <option value="">全部</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-grid" id="resultsGrid">
+          <div class="empty-state">搜尋結果將顯示在這裡</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 新增 -->
+    <div id="add" class="tab-content" style="display:none;">
+      <div class="panel" style="display:grid; gap:16px; max-width:100%;">
+        <div class="toolbar">
+          <button onclick="resetForm()" class="ghost">reset</button>
+          <button onclick="saveConfig()" class="primary">save</button>
+        </div>
+
+          <!-- 幣別選擇 -->
+          <div class="box">
+            <strong>支援幣別 *</strong>
+            <div style="display:grid; gap:8px;">
+              <div style="padding:10px 12px; border-radius:4px; border:1px solid var(--line); background:#f9f9f9; min-height:38px; display:flex; align-items:center;">
+                <span id="currencyDisplay" style="word-break:break-all;">未選擇</span>
+              </div>
+              <button onclick="openCurrencyModal()" class="primary" style="width:100%;">選擇幣別</button>
+            </div>
+            <div id="currencyError" class="error-text"></div>
+          </div>
+
+          <!-- Website選擇 -->
+          <div class="box">
+            <strong>支援Website *</strong>
+            <div style="display:grid; gap:8px;">
+              <div style="padding:10px 12px; border-radius:4px; border:1px solid var(--line); background:#f9f9f9; min-height:38px; display:flex; align-items:center;">
+                <span id="websiteDisplay" style="word-break:break-all;">未選擇</span>
+              </div>
+              <button onclick="openWebsiteModal()" class="primary" style="width:100%;">選擇Website</button>
+            </div>
+            <div id="websiteError" class="error-text"></div>
+          </div>
+
+          <!-- 遊戲桌子選擇 -->
+          <div class="box">
+            <strong>遊戲桌子 *</strong>
+            <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">按遊戲類型選擇，至少選擇1個</div>
+            <div class="game-types-section" id="gameTypesSection"></div>
+            <div id="tablesError" class="error-text" style="margin-top:8px;"></div>
+          </div>
+
+          <!-- 選中的桌子排序 -->
+          <div class="box">
+            <strong>選中桌子排序（可拖拉調整）</strong>
+            <div class="selected-tables" id="selectedTablesArea">
+              <div style="color:var(--muted); font-size:13px; width:100%; text-align:center; line-height:60px;">尚未選擇桌子</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 幣別選擇彈窗 -->
+  <div id="currencyModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>選擇幣別</h3>
+        <button class="modal-close" onclick="closeCurrencyModal()">×</button>
+      </div>
+      <div class="checkbox-grid" id="currencyCheckboxes"></div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
+        <button onclick="closeCurrencyModal()" class="ghost">取消</button>
+        <button onclick="confirmCurrency()" class="primary">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Website選擇彈窗 -->
+  <div id="websiteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>選擇Website</h3>
+        <button class="modal-close" onclick="closeWebsiteModal()">×</button>
+      </div>
+      <div class="checkbox-grid" id="websiteCheckboxes"></div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
+        <button onclick="closeWebsiteModal()" class="ghost">取消</button>
+        <button onclick="confirmWebsite()" class="primary">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CURRENCIES = ['SGD', 'MYR', 'HKD', 'CNY', 'JPY', 'AUD', 'IDR', 'USD', 'KRW', 'THB', 'TWD', 'VND', 'NZD', 'PTI', 'PTV', 'INR', 'PHP', 'EUR', 'MNT', 'RUB', 'MMK', 'AED'];
+    const WEBSITES = ['A01 website', 'A02 website', 'A03 website', 'A04 website', 'A05 website', 'A06 website', 'A07 website', 'A08 website', 'A09 website', 'A010 website', 'B01 website', 'B02 website', 'B03 website', 'B04 website', 'B05 website'];
+    const GAME_TYPES = {
+      'baccarat': { name: '百家樂', tables: ['1','2','3','4','5','6','7','8','9','10','11','C01','C02','C03','C04','C05','C06','C07','C08','C09','C10','C11','C12','C13','C14','C15','C16','C17','C18','C19','C20'] },
+      'sicbo': { name: 'Extra骰寶', tables: ['131','132','C131','C132'] },
+      'fantan': { name: '色碟', tables: ['151','C151'] },
+      'roulette': { name: '輪盤', tables: ['71','72','371','571'] }
+    };
+
+    const state = {
+      selectedCurrencies: new Set(),
+      selectedWebsites: new Set(),
+      selectedTables: [],
+      configs: {},
+      dragFromIndex: null,
+      editingKey: null
+    };
+
+    function init() {
+      renderCurrencyCheckboxes();
+      renderWebsiteCheckboxes();
+      renderGameTypes();
+      loadFromStorage();
+      renderConfigList();
+      populateFilters();
+      applyFilters();
+    }
+
+    function loadFromStorage() {
+      const saved = localStorage.getItem('promotion-games');
+      if (saved) {
+        try {
+          state.configs = JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to load:', e);
+        }
+      }
+    }
+
+    function saveToStorage() {
+      localStorage.setItem('promotion-games', JSON.stringify(state.configs));
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.getElementById(tab).style.display = 'grid';
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      if (tab === 'view') applyFilters();
+    }
+
+    function renderCurrencyCheckboxes() {
+      const grid = document.getElementById('currencyCheckboxes');
+      grid.innerHTML = CURRENCIES.map(curr => `
+        <label class="checkbox-item">
+          <input type="checkbox" value="${curr}" />
+          <span>${curr}</span>
+        </label>
+      `).join('');
+    }
+
+    function openCurrencyModal() {
+      document.querySelectorAll('#currencyCheckboxes input').forEach(inp => inp.checked = false);
+      state.selectedCurrencies.forEach(curr => {
+        const inp = document.querySelector(`#currencyCheckboxes input[value="${curr}"]`);
+        if (inp) inp.checked = true;
+      });
+      document.getElementById('currencyModal').classList.add('active');
+    }
+
+    function closeCurrencyModal() {
+      document.getElementById('currencyModal').classList.remove('active');
+    }
+
+    function confirmCurrency() {
+      const checked = Array.from(document.getElementById('currencyCheckboxes').querySelectorAll('input:checked'));
+      if (checked.length === 0) {
+        alert('請至少選擇一個幣別');
+        return;
+      }
+      state.selectedCurrencies = new Set(checked.map(inp => inp.value));
+      document.getElementById('currencyDisplay').textContent = Array.from(state.selectedCurrencies).join(', ');
+      document.getElementById('currencyError').style.display = 'none';
+      closeCurrencyModal();
+    }
+
+    function renderWebsiteCheckboxes() {
+      const grid = document.getElementById('websiteCheckboxes');
+      grid.innerHTML = WEBSITES.map(web => `
+        <label class="checkbox-item">
+          <input type="checkbox" value="${web}" />
+          <span>${web}</span>
+        </label>
+      `).join('');
+    }
+
+    function openWebsiteModal() {
+      document.querySelectorAll('#websiteCheckboxes input').forEach(inp => inp.checked = false);
+      state.selectedWebsites.forEach(web => {
+        const inp = document.querySelector(`#websiteCheckboxes input[value="${web}"]`);
+        if (inp) inp.checked = true;
+      });
+      document.getElementById('websiteModal').classList.add('active');
+    }
+
+    function closeWebsiteModal() {
+      document.getElementById('websiteModal').classList.remove('active');
+    }
+
+    function confirmWebsite() {
+      const checked = Array.from(document.getElementById('websiteCheckboxes').querySelectorAll('input:checked'));
+      if (checked.length === 0) {
+        alert('請至少選擇一個Website');
+        return;
+      }
+      state.selectedWebsites = new Set(checked.map(inp => inp.value));
+      document.getElementById('websiteDisplay').textContent = Array.from(state.selectedWebsites).join(', ');
+      document.getElementById('websiteError').style.display = 'none';
+      closeWebsiteModal();
+    }
+
+    function renderGameTypes() {
+      const section = document.getElementById('gameTypesSection');
+      section.innerHTML = Object.entries(GAME_TYPES).map(([key, type]) => `
+        <div class="game-type-group">
+          <div class="game-type-name">${type.name}</div>
+          <div class="table-checkbox-grid">
+            ${type.tables.map(table => `
+              <label class="table-checkbox">
+                <input type="checkbox" value="${table}" onchange="updateSelectedTables()" />
+                <span>${table}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateSelectedTables() {
+      const checked = Array.from(document.querySelectorAll('#gameTypesSection input:checked'));
+      state.selectedTables = checked.map(inp => inp.value);
+      renderSelectedTablesArea();
+      document.getElementById('tablesError').style.display = 'none';
+    }
+
+    function renderSelectedTablesArea() {
+      const area = document.getElementById('selectedTablesArea');
+      if (state.selectedTables.length === 0) {
+        area.innerHTML = '<div style="color:var(--muted); font-size:13px; width:100%; text-align:center; line-height:60px;">尚未選擇桌子</div>';
+        return;
+      }
+      area.innerHTML = state.selectedTables.map((table, idx) => `
+        <div class="table-chip" draggable="true" data-index="${idx}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragend="dragEnd(event)">
+          <span>${table}</span>
+          <button class="close" onclick="removeTable('${table}')">×</button>
+        </div>
+      `).join('');
+    }
+
+    function dragStart(e) {
+      state.dragFromIndex = parseInt(e.target.closest('.table-chip').dataset.index);
+      e.target.closest('.table-chip').classList.add('dragging');
+    }
+    function dragOver(e) { e.preventDefault(); }
+    function dragDrop(e) {
+      e.preventDefault();
+      const toIndex = parseInt(e.target.closest('.table-chip').dataset.index);
+      if (state.dragFromIndex !== toIndex) {
+        const [moved] = state.selectedTables.splice(state.dragFromIndex, 1);
+        state.selectedTables.splice(toIndex, 0, moved);
+        renderSelectedTablesArea();
+      }
+    }
+    function dragEnd(e) {
+      document.querySelectorAll('.table-chip').forEach(el => el.classList.remove('dragging'));
+    }
+
+    function removeTable(table) {
+      state.selectedTables = state.selectedTables.filter(t => t !== table);
+      document.querySelector(`#gameTypesSection input[value="${table}"]`).checked = false;
+      renderSelectedTablesArea();
+    }
+
+    function saveConfig() {
+      document.getElementById('currencyError').style.display = 'none';
+      document.getElementById('websiteError').style.display = 'none';
+      document.getElementById('tablesError').style.display = 'none';
+
+      let valid = true;
+      if (state.selectedCurrencies.size === 0) {
+        document.getElementById('currencyError').textContent = '必填';
+        document.getElementById('currencyError').style.display = 'block';
+        valid = false;
+      }
+      if (state.selectedWebsites.size === 0) {
+        document.getElementById('websiteError').textContent = '必填';
+        document.getElementById('websiteError').style.display = 'block';
+        valid = false;
+      }
+      if (state.selectedTables.length === 0) {
+        document.getElementById('tablesError').textContent = '至少選擇1個';
+        document.getElementById('tablesError').style.display = 'block';
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // 檢查是否為編輯模式
+      if (state.editingKey) {
+        const [editCurr, editWeb] = state.editingKey.split('-');
+        const curr = Array.from(state.selectedCurrencies)[0];
+        const web = Array.from(state.selectedWebsites)[0];
+        
+        // 刪除舊的
+        delete state.configs[state.editingKey];
+        
+        // 如果幣別或 website 改了，檢查新組合是否重複
+        const newKey = `${curr}-${web}`;
+        if (newKey !== state.editingKey && state.configs[newKey]) {
+          alert(`${curr} + ${web} 有重複設置`);
+          return;
+        }
+        
+        // 保存新的
+        const now = new Date();
+        const lastEdited = now.toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        state.configs[newKey] = {
+          currency: curr,
+          website: web,
+          tables: [...state.selectedTables],
+          timestamp: new Date().toISOString(),
+          lastEditor: 'admin',
+          lastEdited: lastEdited
+        };
+        
+        saveToStorage();
+        alert('已更新');
+        state.editingKey = null;
+        resetForm();
+        switchTab('view');
+        return;
+      }
+
+      // 為每個 currency × website 組合創建配置
+      const currencies = Array.from(state.selectedCurrencies);
+      const websites = Array.from(state.selectedWebsites);
+      let duplicates = [];
+
+      currencies.forEach(curr => {
+        websites.forEach(web => {
+          const key = `${curr}-${web}`;
+          if (state.configs[key]) {
+            duplicates.push(`${curr} + ${web}`);
+          }
+        });
+      });
+
+      if (duplicates.length > 0) {
+        alert(`以下組合有重複設置：\n${duplicates.join('\n')}`);
+        return;
+      }
+
+      // 保存所有組合
+      const now = new Date();
+      const lastEdited = now.toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      
+      currencies.forEach(curr => {
+        websites.forEach(web => {
+          const key = `${curr}-${web}`;
+          state.configs[key] = {
+            currency: curr,
+            website: web,
+            tables: [...state.selectedTables],
+            timestamp: new Date().toISOString(),
+            lastEditor: 'admin',
+            lastEdited: lastEdited
+          };
+        });
+      });
+
+      saveToStorage();
+      alert(`已儲存 ${currencies.length} × ${websites.length} = ${currencies.length * websites.length} 個設置`);
+      resetForm();
+      populateFilters();
+      switchTab('view');
+    }
+
+    function resetForm() {
+      state.selectedCurrencies = new Set();
+      state.selectedWebsites = new Set();
+      state.selectedTables = [];
+      document.getElementById('currencyDisplay').textContent = '未選擇';
+      document.getElementById('websiteDisplay').textContent = '未選擇';
+      document.querySelectorAll('#gameTypesSection input').forEach(inp => inp.checked = false);
+      renderSelectedTablesArea();
+    }
+
+    function renderConfigList() {
+      // Empty - no longer used
+    }
+
+    function deleteConfig(key) {
+      if (confirm('確定刪除？')) {
+        delete state.configs[key];
+        saveToStorage();
+        populateFilters();
+      }
+    }
+
+    function populateFilters() {
+      const currencies = new Set(Object.values(state.configs).map(c => c.currency));
+      const websites = new Set(Object.values(state.configs).map(c => c.website));
+
+      const currFilter = document.getElementById('currencyFilter');
+      const webFilter = document.getElementById('websiteFilter');
+
+      const currOptions = Array.from(currencies).sort();
+      const webOptions = Array.from(websites).sort();
+
+      currFilter.innerHTML = '<option value="">全部</option>' + currOptions.map(c => `<option value="${c}">${c}</option>`).join('');
+      webFilter.innerHTML = '<option value="">全部</option>' + webOptions.map(w => `<option value="${w}">${w}</option>`).join('');
+    }
+
+    function applyFilters() {
+      const currFilter = document.getElementById('currencyFilter').value;
+      const webFilter = document.getElementById('websiteFilter').value;
+
+      let configs = Object.values(state.configs).filter(config => {
+        if (currFilter && config.currency !== currFilter) return false;
+        if (webFilter && config.website !== webFilter) return false;
+        return true;
+      });
+
+      // 按 lastEdited 時間由新到舊排序
+      configs.sort((a, b) => {
+        const timeA = new Date(a.lastEdited).getTime();
+        const timeB = new Date(b.lastEdited).getTime();
+        return timeB - timeA;
+      });
+
+      const grid = document.getElementById('resultsGrid');
+      if (configs.length === 0) {
+        grid.innerHTML = '<div class="empty-state">無符合結果</div>';
+        return;
+      }
+
+      grid.innerHTML = configs.map(config => {
+        const key = `${config.currency}-${config.website}`;
+        return `
+        <div class="result-card">
+          <div class="result-header">
+            <div>
+              <div class="result-label">幣別</div>
+              <div class="result-value">${config.currency}</div>
+            </div>
+            <div>
+              <div class="result-label">Website</div>
+              <div class="result-value">${config.website}</div>
+            </div>
+            <div>
+              <div class="result-label">桌子列表</div>
+              <div class="result-tables">
+                ${config.tables.map(table => `<span class="result-table">${table}</span>`).join('')}
+              </div>
+            </div>
+            <div>
+              <div class="result-label">Last Editor</div>
+              <div class="result-value" style="font-size:12px;">${config.lastEditor || 'N/A'}</div>
+            </div>
+            <div>
+              <div class="result-label">Last Edited Time</div>
+              <div class="result-value" style="font-size:12px;">${config.lastEdited || 'N/A'}</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button onclick="editConfig('${key}')" class="ghost" style="padding:6px 12px; font-size:12px;">修改</button>
+              <button onclick="deleteConfigItem('${key}')" class="ghost danger" style="padding:6px 12px; font-size:12px; color:#ef4444; border-color:#ef4444;">刪除</button>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function editConfig(key) {
+      const config = state.configs[key];
+      if (!config) return;
+      state.selectedCurrencies = new Set([config.currency]);
+      state.selectedWebsites = new Set([config.website]);
+      state.selectedTables = [...config.tables];
+      state.editingKey = key;
+      document.getElementById('currencyDisplay').textContent = config.currency;
+      document.getElementById('websiteDisplay').textContent = config.website;
+      document.querySelectorAll('#gameTypesSection input').forEach(inp => {
+        inp.checked = config.tables.includes(inp.value);
+      });
+      renderSelectedTablesArea();
+      switchTab('add');
+    }
+
+    function deleteConfigItem(key) {
+      if (confirm('確定刪除？')) {
+        delete state.configs[key];
+        saveToStorage();
+        applyFilters();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
