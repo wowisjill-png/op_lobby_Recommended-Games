@@ -1,741 +1,1017 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OP 推廣遊戲表設定</title>
-  <style>
-    :root {
-      --bg: #ffffff;
-      --panel: #f5f5f5;
-      --line: #e0e0e0;
-      --text: #11151d;
-      --muted: #757575;
-      --primary: #1e8db8;
-      --success: #22c55e;
-      --error: #ef4444;
-      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      --radius: 8px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Group › Recommended Games</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-      background: #ffffff;
-      color: var(--text);
-      min-height: 100vh;
-      padding: 24px;
-    }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .app { max-width: 1600px; margin: 0 auto; display: grid; gap: 18px; }
-    .hero { background: #ffffff; border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: var(--radius); padding: 24px; display: grid; gap: 12px; }
-    .hero h1 { margin: 0; font-size: 32px; line-height: 1.08; color: var(--text); }
-    .hero p { margin: 0; color: var(--muted); line-height: 1.7; font-size: 14px; }
-    .hero-link { display: inline-block; margin-top: 8px; padding: 8px 12px; background: transparent; border: 1px solid var(--primary); border-radius: 4px; color: var(--primary); text-decoration: none; font-size: 13px; }
-    .hero-link:hover { background: rgba(30, 141, 184, 0.05); }
+  :root {
+    --bg: #ffffff;
+    --text: #11151d;
+    --text-muted: #6b7280;
+    --text-light: #9ca3af;
+    --border: #e5e7eb;
+    --border-hover: #d1d5db;
+    --surface: #f9fafb;
+    --surface-hover: #f3f4f6;
+    --primary: #1e8db8;
+    --primary-light: #e8f4f9;
+    --primary-hover: #1a7da6;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --env-bg: #fff7ed;
+    --env-text: #c2410c;
+    --env-border: #fed7aa;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
 
-    .tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px; }
-    .tab-btn { background: none; border: none; color: var(--muted); padding: 12px 16px; cursor: pointer; font-size: 15px; transition: 0.2s; }
-    .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0f2f5;
+    color: var(--text);
+    font-size: 14px;
+    min-height: 100vh;
+  }
 
-    .container { display: grid; grid-template-columns: 340px 1fr; gap: 18px; }
-    .panel { background: #ffffff; border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: var(--radius); padding: 18px; }
-    .panel h2 { margin: 0 0 12px; font-size: 18px; }
+  .page-wrapper { max-width: 1280px; margin: 0 auto; padding: 24px 24px 60px; }
 
-    .box { display: grid; gap: 10px; padding: 14px; border-radius: 8px; border: 1px solid var(--line); background: #f9f9f9; }
-    .box strong { display: block; margin-bottom: 8px; }
+  /* ENV Banner */
+  .env-banner {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--env-bg); color: var(--env-text);
+    border: 1px solid var(--env-border); border-radius: 4px;
+    padding: 3px 10px; font-size: 11px; font-family: 'DM Mono', monospace;
+    font-weight: 500; letter-spacing: 0.03em; margin-bottom: 14px;
+  }
+  .env-dot { width: 6px; height: 6px; background: var(--env-text); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-    button {
-      border: 1px solid var(--line);
-      background: #f5f5f5;
-      color: var(--text);
-      border-radius: 4px;
-      padding: 8px 16px;
-      font: inherit;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-    button:hover { background: #eeeeee; }
-    .primary { background: var(--primary); border-color: var(--primary); color: #ffffff; font-weight: 600; }
-    .primary:hover { background: #1a7a9e; }
-    .ghost { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-    .ghost:hover { background: rgba(30, 141, 184, 0.05); }
+  /* Breadcrumb */
+  .breadcrumb { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 20px; letter-spacing: -0.01em; }
+  .breadcrumb span { color: var(--text-muted); font-weight: 400; }
 
-    .field-value {
-      padding: 10px 12px;
-      border-radius: 4px;
-      border: 1px solid var(--line);
-      background: #f9f9f9;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .select-btn { width: 100%; text-align: left; padding: 10px 12px; }
+  /* Card */
+  .card { background: var(--bg); border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
 
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal.active { display: flex; }
-    .modal-content {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 24px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-    .modal-close { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; }
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .tab {
+    padding: 14px 22px; font-size: 13.5px; font-weight: 500; cursor: pointer;
+    color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-    .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
-    .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); cursor: pointer; user-select: none; }
-    .checkbox-item input { accent-color: var(--primary); }
+  /* Tab Content */
+  .tab-content { display: none; padding: 28px; }
+  .tab-content.active { display: block; }
 
-    .game-types-section { display: grid; gap: 14px; }
-    .game-type-group { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: rgba(255,255,255,0.02); }
-    .game-type-name { font-weight: 700; margin-bottom: 8px; font-size: 14px; color: var(--primary); }
-    .table-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; }
-    .table-checkbox { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  /* Section title */
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 18px; }
 
-    .selected-tables {
-      min-height: 60px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 14px;
-      border: 1px dashed var(--line);
-      border-radius: 14px;
-      background: rgba(255,255,255,0.02);
-    }
-    .table-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(124, 58, 237, 0.2);
-      border: 1px solid rgba(124, 58, 237, 0.4);
-      user-select: none;
-      cursor: grab;
-      font-size: 13px;
-    }
-    .table-chip[draggable="true"]:active { cursor: grabbing; }
-    .table-chip.dragging { opacity: 0.45; }
-    .table-chip .close {
-      width: 16px;
-      height: 16px;
-      border: 0;
-      background: rgba(255,255,255,0.1);
-      border-radius: 999px;
-      display: inline-grid;
-      place-items: center;
-      padding: 0;
-      cursor: pointer;
-      font-size: 12px;
-    }
+  /* Form Row */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 13px; font-weight: 500; color: var(--text); }
+  label .req { color: var(--danger); margin-left: 2px; }
 
-    .config-list { display: grid; gap: 8px; }
-    .config-item {
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      cursor: pointer;
-      transition: 0.2s;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .config-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(124, 58, 237, 0.4); }
-    .config-name { font-weight: 600; }
-    .config-delete { background: rgba(239, 68, 68, 0.2); border: none; color: #fca5a5; padding: 6px 10px; font-size: 12px; }
+  /* Trigger Button */
+  .trigger-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg); cursor: pointer; font-family: inherit; font-size: 13.5px;
+    color: var(--text); transition: border-color 0.15s, box-shadow 0.15s; min-height: 38px;
+  }
+  .trigger-btn:hover { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,141,184,0.08); }
+  .trigger-btn .placeholder { color: var(--text-light); }
+  .trigger-btn .selected-tags { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+  .trigger-btn .chevron { color: var(--text-muted); flex-shrink: 0; margin-left: 8px; transition: transform 0.15s; }
 
-    .search-section { display: grid; gap: 12px; margin-bottom: 18px; }
-    .search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .search-select {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      font-family: inherit;
-      cursor: pointer;
-    }
+  /* Tags */
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--primary-light); color: var(--primary);
+    border-radius: 4px; padding: 2px 8px; font-size: 12px; font-weight: 500;
+  }
 
-    .results-grid { display: grid; gap: 12px; }
-    .result-card {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      background: rgba(255,255,255,0.02);
-    }
-    .result-header { display: grid; grid-template-columns: 80px 100px 1fr; gap: 12px; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
-    .result-label { color: var(--muted); font-size: 12px; text-transform: uppercase; }
-    .result-value { font-weight: 600; }
-    .result-tables { display: flex; flex-wrap: wrap; gap: 8px; }
-    .result-table { padding: 6px 10px; border-radius: 8px; background: rgba(124, 58, 237, 0.2); border: 1px solid rgba(124, 58, 237, 0.4); font-size: 12px; }
+  /* Games Section */
+  .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .game-card {
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px;
+    cursor: pointer; transition: all 0.15s; background: var(--bg);
+  }
+  .game-card:hover { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,141,184,0.08); }
+  .game-card .game-name { font-weight: 500; font-size: 13.5px; margin-bottom: 4px; }
+  .game-card .table-count { font-size: 12px; color: var(--text-muted); }
+  .game-card.has-selection { border-color: var(--primary); background: var(--primary-light); }
+  .game-card.has-selection .game-name { color: var(--primary); }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
-    .toolbar { display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 12px; }
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 
-    .error-text { color: var(--error); font-size: 12px; display: none; }
-  </style>
+  /* Sort Section */
+  .sort-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .sort-list { display: flex; flex-direction: column; gap: 6px; min-height: 60px; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; background: var(--surface); }
+  .sort-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 8px 12px; cursor: grab; user-select: none; transition: box-shadow 0.15s;
+  }
+  .sort-item:active { cursor: grabbing; }
+  .sort-item.dragging { opacity: 0.5; box-shadow: var(--shadow-md); }
+  .sort-item.drag-over { border-color: var(--primary); background: var(--primary-light); }
+  .drag-handle { color: var(--text-light); display: flex; align-items: center; }
+  .sort-item-label { font-size: 13px; font-weight: 500; }
+  .sort-empty { color: var(--text-light); font-size: 13px; text-align: center; padding: 16px; }
+
+  /* Action Buttons */
+  .btn-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .btn {
+    padding: 8px 22px; border-radius: var(--radius); font-family: inherit;
+    font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+    border: 1px solid transparent; letter-spacing: 0.01em;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-reset { background: transparent; color: var(--primary); border-color: var(--primary); }
+  .btn-reset:hover { background: var(--primary-light); }
+  .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-outline { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  .btn-outline:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface); }
+  .btn-sm { padding: 5px 14px; font-size: 12.5px; }
+
+  /* Modal Overlay */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(17,21,29,0.45); backdrop-filter: blur(2px);
+    z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    width: 480px; max-width: calc(100vw - 40px); max-height: 80vh;
+    display: flex; flex-direction: column; animation: modalIn 0.18s ease;
+    -webkit-user-select: none; user-select: none;
+  }
+  @keyframes modalIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  .modal-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 4px; display: flex; }
+  .modal-close:hover { background: var(--surface); color: var(--text); }
+  .modal-body { padding: 16px 22px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* Checkbox list */
+  .check-search { width: 100%; padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 13px; margin-bottom: 10px; outline: none; }
+  .check-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,141,184,0.1); }
+  .check-list { display: flex; flex-direction: column; gap: 2px; }
+  .check-all { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: var(--radius); cursor: pointer; transition: background 0.1s; }
+  .check-item:hover { background: var(--surface); }
+  .check-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
+  .check-item label { cursor: pointer; font-size: 13.5px; flex: 1; }
+
+  /* Table modal (tables grouped) */
+  .table-group { margin-bottom: 14px; }
+  .table-group-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .table-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .table-chip {
+    padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px;
+    font-size: 12.5px; cursor: pointer; transition: all 0.12s; color: var(--text); background: var(--bg);
+  }
+  .table-chip:hover { border-color: var(--primary); color: var(--primary); }
+  .table-chip.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* List Tab */
+  .search-bar { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 22px; flex-wrap: wrap; }
+  .search-bar .form-group { flex: 1; min-width: 160px; }
+  .search-bar .btn { align-self: flex-end; }
+
+  /* Results Table */
+  .results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .results-table th { background: var(--surface); padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 2px solid var(--border); white-space: nowrap; }
+  .results-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .results-table tr:last-child td { border-bottom: none; }
+  .results-table tr:hover td { background: #fafbfc; }
+  .table-list-cell { display: flex; flex-wrap: wrap; gap: 4px; }
+  .table-chip-sm { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 11.5px; font-family: 'DM Mono', monospace; }
+  .time-cell { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .editor-cell { font-size: 12.5px; font-weight: 500; }
+
+  .action-cell { display: flex; gap: 6px; white-space: nowrap; }
+
+  /* Toast */
+  .toast-container { position: fixed; bottom: 28px; right: 28px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
+  .toast {
+    background: var(--text); color: white; padding: 10px 16px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg);
+    animation: toastIn 0.2s ease; display: flex; align-items: center; gap: 8px;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  @keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Confirm Modal */
+  .confirm-modal { width: 360px; }
+  .confirm-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--danger-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .confirm-text { text-align: center; font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .confirm-title { text-align: center; font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 14px; }
+
+  .info-box { background: var(--primary-light); border: 1px solid #bde0f0; border-radius: var(--radius); padding: 10px 14px; font-size: 12.5px; color: #1a6d8f; margin-bottom: 16px; line-height: 1.5; }
+  .info-box strong { font-weight: 600; }
+
+  /* Validation */
+  .field-error { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+  .trigger-btn.invalid { border-color: var(--danger); }
+
+  /* Combinations preview */
+  .combo-preview { margin-top: 12px; }
+  .combo-preview-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+  .combo-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .combo-tag { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; border-radius: 4px; padding: 3px 9px; font-size: 12px; font-family: 'DM Mono', monospace; }
+
+  .drag-hint { font-size: 11.5px; color: var(--text-light); display: flex; align-items: center; gap: 5px; }
+
+  /* Badge */
+  .badge { display: inline-block; background: var(--primary-light); color: var(--primary); border-radius: 20px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+    .search-bar { flex-direction: column; }
+  }
+</style>
 </head>
 <body>
-  <div style="padding:8px 24px; background:#f0f0f0; border-bottom:1px solid #e0e0e0; font-size:12px; color:#666;">ENV: Staging</div>
-  <div class="app">
-    <section class="hero">
-      <h1>Game Group › 推廣遊戲表設定</h1>
-    </section>
 
+<div class="page-wrapper">
+  <div class="env-banner"><span class="env-dot"></span>ENV: Staging</div>
+  <div class="breadcrumb">Game Group <span>›</span> Recommended Games</div>
+
+  <div class="card">
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('view')">推廣遊戲列表</button>
-      <button class="tab-btn" onclick="switchTab('add')">新增</button>
+      <div class="tab active" id="tab-list" onclick="switchTab('list')">Recommended Games List</div>
+      <div class="tab" id="tab-add" onclick="switchTab('add')">Add Recommended Game</div>
     </div>
 
-    <!-- TAB 1: 查看 -->
-    <div id="view" class="tab-content" style="display:grid;">
-      <div class="panel">
-        <h2>搜尋結果</h2>
+    <!-- ADD TAB -->
+    <div class="tab-content" id="content-add">
+      <div class="info-box">
+        <strong>Note:</strong> Selecting multiple currencies and websites will create separate configurations for each combination.
+        e.g. SGD + MYR × A01 + A02 = 4 configurations saved individually.
+      </div>
 
-        <div class="search-section">
-          <div class="search-row">
-            <div>
-              <label style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">幣別</label>
-              <select class="search-select" id="currencyFilter" onchange="applyFilters()">
-                <option value="">全部</option>
-              </select>
-            </div>
-            <div>
-              <label style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">Website</label>
-              <select class="search-select" id="websiteFilter" onchange="applyFilters()">
-                <option value="">全部</option>
-              </select>
-            </div>
-          </div>
+      <div class="section-title">Basic Configuration</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Currency <span class="req">*</span></label>
+          <button class="trigger-btn" id="btn-currency-add" onclick="openModal('currency','add')">
+            <span class="selected-tags" id="currency-tags-add"><span class="placeholder">Select currencies...</span></span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <span class="field-error" id="err-currency-add">Please select at least one currency.</span>
         </div>
+        <div class="form-group">
+          <label>Website <span class="req">*</span></label>
+          <button class="trigger-btn" id="btn-website-add" onclick="openModal('website','add')">
+            <span class="selected-tags" id="website-tags-add"><span class="placeholder">Select websites...</span></span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <span class="field-error" id="err-website-add">Please select at least one website.</span>
+        </div>
+      </div>
 
-        <div class="results-grid" id="resultsGrid">
-          <div class="empty-state">搜尋結果將顯示在這裡</div>
+      <div id="combo-preview-add" class="combo-preview" style="display:none">
+        <div class="combo-preview-title">Will create combinations:</div>
+        <div class="combo-tags" id="combo-tags-add"></div>
+      </div>
+
+      <hr class="divider">
+      <div class="section-title">Table Settings <span class="req" style="font-size:11px;text-transform:none;font-weight:400;letter-spacing:0">* At least 1 table required total</span></div>
+      <div class="games-grid" id="games-grid-add"></div>
+      <span class="field-error" id="err-games-add" style="margin-top:8px">Please select at least one table.</span>
+
+      <hr class="divider">
+      <div class="section-title">
+        <div class="sort-header">
+          <span>Table Order</span>
+          <span class="drag-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+            Drag to reorder
+          </span>
         </div>
+      </div>
+      <div class="sort-list" id="sort-list-add">
+        <div class="sort-empty">Selected tables will appear here for ordering.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-reset" onclick="resetForm('add')">Reset</button>
+        <button class="btn btn-primary" onclick="saveForm()">Save</button>
       </div>
     </div>
 
-    <!-- TAB 2: 新增 -->
-    <div id="add" class="tab-content" style="display:none;">
-      <div class="panel" style="display:grid; gap:16px; max-width:100%;">
-        <div class="toolbar">
-          <button onclick="resetForm()" class="ghost">reset</button>
-          <button onclick="saveConfig()" class="primary">save</button>
+    <!-- LIST TAB -->
+    <div class="tab-content active" id="content-list">
+      <div class="section-title">Search</div>
+      <div class="search-bar">
+        <div class="form-group">
+          <label>Currency <span class="req">*</span></label>
+          <button class="trigger-btn" id="btn-currency-search" onclick="openModal('currency','search')">
+            <span class="selected-tags" id="currency-tags-search"><span class="placeholder">Select currencies...</span></span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
-
-          <!-- 幣別選擇 -->
-          <div class="box">
-            <strong>支援幣別 *</strong>
-            <div style="display:grid; gap:8px;">
-              <div style="padding:10px 12px; border-radius:4px; border:1px solid var(--line); background:#f9f9f9; min-height:38px; display:flex; align-items:center;">
-                <span id="currencyDisplay" style="word-break:break-all;">未選擇</span>
-              </div>
-              <button onclick="openCurrencyModal()" class="primary" style="width:100%;">選擇幣別</button>
-            </div>
-            <div id="currencyError" class="error-text"></div>
-          </div>
-
-          <!-- Website選擇 -->
-          <div class="box">
-            <strong>支援Website *</strong>
-            <div style="display:grid; gap:8px;">
-              <div style="padding:10px 12px; border-radius:4px; border:1px solid var(--line); background:#f9f9f9; min-height:38px; display:flex; align-items:center;">
-                <span id="websiteDisplay" style="word-break:break-all;">未選擇</span>
-              </div>
-              <button onclick="openWebsiteModal()" class="primary" style="width:100%;">選擇Website</button>
-            </div>
-            <div id="websiteError" class="error-text"></div>
-          </div>
-
-          <!-- 遊戲桌子選擇 -->
-          <div class="box">
-            <strong>遊戲桌子 *</strong>
-            <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">按遊戲類型選擇，至少選擇1個</div>
-            <div class="game-types-section" id="gameTypesSection"></div>
-            <div id="tablesError" class="error-text" style="margin-top:8px;"></div>
-          </div>
-
-          <!-- 選中的桌子排序 -->
-          <div class="box">
-            <strong>選中桌子排序（可拖拉調整）</strong>
-            <div class="selected-tables" id="selectedTablesArea">
-              <div style="color:var(--muted); font-size:13px; width:100%; text-align:center; line-height:60px;">尚未選擇桌子</div>
-            </div>
-          </div>
+        <div class="form-group">
+          <label>Website <span class="req">*</span></label>
+          <button class="trigger-btn" id="btn-website-search" onclick="openModal('website','search')">
+            <span class="selected-tags" id="website-tags-search"><span class="placeholder">Select websites...</span></span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
+        <button class="btn btn-primary" onclick="doSearch()">Search</button>
+        <button class="btn btn-reset" onclick="resetSearch()">Reset</button>
       </div>
-    </div>
-  </div>
 
-  <!-- 幣別選擇彈窗 -->
-  <div id="currencyModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>選擇幣別</h3>
-        <button class="modal-close" onclick="closeCurrencyModal()">×</button>
-      </div>
-      <div class="checkbox-grid" id="currencyCheckboxes"></div>
-      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
-        <button onclick="closeCurrencyModal()" class="ghost">取消</button>
-        <button onclick="confirmCurrency()" class="primary">確認</button>
+      <div id="results-area">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <p>Select currency and website to search for results.</p>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Website選擇彈窗 -->
-  <div id="websiteModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>選擇Website</h3>
-        <button class="modal-close" onclick="closeWebsiteModal()">×</button>
-      </div>
-      <div class="checkbox-grid" id="websiteCheckboxes"></div>
-      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
-        <button onclick="closeWebsiteModal()" class="ghost">取消</button>
-        <button onclick="confirmWebsite()" class="primary">確認</button>
-      </div>
+<!-- Currency Modal -->
+<div class="modal-overlay" id="modal-currency">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Select Currency</span>
+      <button class="modal-close" onclick="closeModal('currency')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="check-search" type="text" placeholder="Search currency..." oninput="filterModal('currency',this.value)">
+      <div class="check-list" id="currency-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('currency')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmModal('currency')">Confirm</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const CURRENCIES = ['SGD', 'MYR', 'HKD', 'CNY', 'JPY', 'AUD', 'IDR', 'USD', 'KRW', 'THB', 'TWD', 'VND', 'NZD', 'PTI', 'PTV', 'INR', 'PHP', 'EUR', 'MNT', 'RUB', 'MMK', 'AED'];
-    const WEBSITES = ['A01 website', 'A02 website', 'A03 website', 'A04 website', 'A05 website', 'A06 website', 'A07 website', 'A08 website', 'A09 website', 'A010 website', 'B01 website', 'B02 website', 'B03 website', 'B04 website', 'B05 website'];
-    const GAME_TYPES = {
-      'baccarat': { name: '百家樂', tables: ['1','2','3','4','5','6','7','8','9','10','11','C01','C02','C03','C04','C05','C06','C07','C08','C09','C10','C11','C12','C13','C14','C15','C16','C17','C18','C19','C20'] },
-      'sicbo': { name: 'Extra骰寶', tables: ['131','132','C131','C132'] },
-      'fantan': { name: '色碟', tables: ['151','C151'] },
-      'roulette': { name: '輪盤', tables: ['71','72','371','571'] }
-    };
+<!-- Website Modal -->
+<div class="modal-overlay" id="modal-website">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Select Website</span>
+      <button class="modal-close" onclick="closeModal('website')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="check-search" type="text" placeholder="Search website..." oninput="filterModal('website',this.value)">
+      <div class="check-list" id="website-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('website')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmModal('website')">Confirm</button>
+    </div>
+  </div>
+</div>
 
-    const state = {
-      selectedCurrencies: new Set(),
-      selectedWebsites: new Set(),
-      selectedTables: [],
-      configs: {},
-      dragFromIndex: null,
-      editingKey: null
-    };
+<!-- Tables Modal -->
+<div class="modal-overlay" id="modal-tables" style="z-index: 1100">
+  <div class="modal" style="width:560px">
+    <div class="modal-header">
+      <span class="modal-title" id="tables-modal-title">Select Tables</span>
+      <button class="modal-close" onclick="closeModal('tables')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="tables-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('tables')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmTables()">Confirm</button>
+    </div>
+  </div>
+</div>
 
-    function init() {
-      renderCurrencyCheckboxes();
-      renderWebsiteCheckboxes();
-      renderGameTypes();
-      loadFromStorage();
-      renderConfigList();
-      populateFilters();
-      applyFilters();
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal confirm-modal">
+    <div class="modal-body" style="padding:28px 24px 20px">
+      <div class="confirm-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </div>
+      <div class="confirm-title">Delete Configuration</div>
+      <div class="confirm-text">Are you sure you want to delete <strong id="confirm-delete-label"></strong>?<br>This action cannot be undone.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('confirm')">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal" style="width:640px;max-height:90vh">
+    <div class="modal-header">
+      <span class="modal-title">Edit Configuration — <span id="edit-modal-label"></span></span>
+      <button class="modal-close" onclick="closeModal('edit')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="edit-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('edit')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ===================== DATA =====================
+const CURRENCIES = ['SGD','MYR','HKD','CNY','JPY','AUD','IDR','USD','KRW','THB','TWD','VND','NZD','PTI','PTV','INR','PHP','EUR','MNT','RUB','MMK','AED'];
+const WEBSITES = ['A01 website','A02 website','A03 website','A04 website','A05 website','A06 website','A07 website','A08 website','A09 website','A010 website','B01 website','B02 website','B03 website','B04 website','B05 website'];
+
+function genTables(prefix, start, end) {
+  const arr = [];
+  for(let i=start;i<=end;i++) arr.push(prefix ? prefix+i : String(i));
+  return arr;
+}
+const GAMES = [
+  { id:'baccarat', name:'Baccarat', tables: [...genTables('',1,11), ...genTables('C',1,20)] },
+  { id:'dragontiger', name:'Dragon Tiger', tables: ['31','32','33'] },
+  { id:'extrasicbo', name:'Extra Sicbo', tables: ['131','132','C131','C132'] },
+  { id:'sedie', name:'Sedie', tables: ['151','C151'] },
+  { id:'roulette', name:'Roulette', tables: ['71','72','371','571'] },
+];
+
+// State
+let state = {
+  add: { currencies: [], websites: [], gameTables: {}, sortOrder: [] },
+  search: { currencies: [], websites: [] },
+  edit: { id: null, currencies: [], websites: [], gameTables: {}, sortOrder: [] }
+};
+
+let savedData = []; // { id, currency, website, tables, lastEditor, lastEditedTime }
+let nextId = 1;
+
+// Modal context
+let modalCtx = { type: null, context: null, tempSelected: [], currentGame: null, tempTables: [] };
+let deleteTargetId = null;
+
+// ===================== TABS =====================
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('content-'+tab).classList.add('active');
+  if(tab === 'add') renderGamesGrid('add');
+}
+
+// ===================== RENDER GAMES GRID =====================
+function renderGamesGrid(ctx) {
+  const grid = document.getElementById('games-grid-'+ctx);
+  if(!grid) return;
+  const gs = ctx === 'add' ? state.add : state.edit;
+  grid.innerHTML = GAMES.map(g => {
+    const sel = (gs.gameTables[g.id] || []).length;
+    return `<div class="game-card${sel>0?' has-selection':''}" data-game-id="${g.id}" data-context="${ctx}">
+      <div class="game-name">${g.name}</div>
+      <div class="table-count">${sel>0 ? sel+' table(s) selected' : 'Click to select tables'}</div>
+    </div>`;
+  }).join('');
+  
+  // Add event listeners
+  grid.querySelectorAll('.game-card').forEach(card => {
+    card.addEventListener('click', function() {
+      openTablesModal(this.dataset.gameId, this.dataset.context);
+    });
+  });
+}
+
+// ===================== MODAL OPEN/CLOSE =====================
+function openModal(type, ctx) {
+  modalCtx.type = type;
+  modalCtx.context = ctx;
+  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : state.add);
+  modalCtx.tempSelected = [...(type === 'currency' ? gs.currencies : gs.websites)];
+  renderCheckList(type, modalCtx.tempSelected);
+  document.getElementById('modal-'+type).classList.add('open');
+}
+
+function closeModal(type) {
+  const el = document.getElementById('modal-'+type);
+  if(el) el.classList.remove('open');
+}
+
+function filterModal(type, val) {
+  const items = type === 'currency' ? CURRENCIES : WEBSITES;
+  renderCheckList(type, modalCtx.tempSelected, val.toLowerCase());
+}
+
+function renderCheckList(type, selected, filter='') {
+  const items = type === 'currency' ? CURRENCIES : WEBSITES;
+  const visible = filter ? items.filter(i => i.toLowerCase().includes(filter)) : items;
+  const allChecked = visible.length > 0 && visible.every(i => selected.includes(i));
+  let html = `<div class="check-all"><div class="check-item">
+    <input type="checkbox" id="chk-all-${type}" ${allChecked?'checked':''} onchange="toggleAll('${type}')">
+    <label for="chk-all-${type}">Select All ${filter ? '(filtered)':''}</label>
+  </div></div>`;
+  html += visible.map(item => `<div class="check-item">
+    <input type="checkbox" id="chk-${type}-${item.replace(/\s/g,'_')}" ${selected.includes(item)?'checked':''} onchange="toggleItem('${type}','${item}',this.checked)">
+    <label for="chk-${type}-${item.replace(/\s/g,'_')}">${item}</label>
+  </div>`).join('');
+  document.getElementById(type+'-list').innerHTML = html;
+}
+
+function toggleAll(type) {
+  const items = type === 'currency' ? CURRENCIES : WEBSITES;
+  const searchVal = document.querySelector('#modal-'+type+' .check-search').value.toLowerCase();
+  const visible = searchVal ? items.filter(i=>i.toLowerCase().includes(searchVal)) : items;
+  const allChecked = document.getElementById('chk-all-'+type).checked;
+  if(allChecked) {
+    visible.forEach(i => { if(!modalCtx.tempSelected.includes(i)) modalCtx.tempSelected.push(i); });
+  } else {
+    modalCtx.tempSelected = modalCtx.tempSelected.filter(i => !visible.includes(i));
+  }
+  renderCheckList(type, modalCtx.tempSelected, searchVal);
+}
+
+function toggleItem(type, item, checked) {
+  if(checked && !modalCtx.tempSelected.includes(item)) modalCtx.tempSelected.push(item);
+  else if(!checked) modalCtx.tempSelected = modalCtx.tempSelected.filter(i=>i!==item);
+  const searchVal = document.querySelector('#modal-'+type+' .check-search').value.toLowerCase();
+  renderCheckList(type, modalCtx.tempSelected, searchVal);
+}
+
+function confirmModal(type) {
+  const ctx = modalCtx.context;
+  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : state.add);
+  if(type === 'currency') gs.currencies = [...modalCtx.tempSelected];
+  else gs.websites = [...modalCtx.tempSelected];
+
+  updateTriggerBtn(type, ctx, gs[type==='currency'?'currencies':'websites']);
+  if(ctx !== 'search') updateComboPreview(ctx);
+  closeModal(type);
+  // Clear validation error
+  const errEl = document.getElementById(`err-${type}-${ctx}`);
+  if(errEl && gs[type==='currency'?'currencies':'websites'].length > 0) {
+    errEl.classList.remove('show');
+    document.getElementById(`btn-${type}-${ctx}`).classList.remove('invalid');
+  }
+}
+
+function updateTriggerBtn(type, ctx, items) {
+  const el = document.getElementById(`${type}-tags-${ctx}`);
+  if(!el) return;
+  if(items.length === 0) {
+    el.innerHTML = `<span class="placeholder">Select ${type === 'currency' ? 'currencies' : 'websites'}...</span>`;
+  } else {
+    const MAX = 3;
+    let tags = items.slice(0, MAX).map(i => `<span class="tag">${i}</span>`).join('');
+    if(items.length > MAX) tags += `<span class="tag">+${items.length - MAX}</span>`;
+    el.innerHTML = tags;
+  }
+}
+
+// Combo preview
+function updateComboPreview(ctx) {
+  const gs = ctx === 'edit' ? state.edit : state.add;
+  const previewEl = document.getElementById('combo-preview-'+ctx);
+  const tagsEl = document.getElementById('combo-tags-'+ctx);
+  if(!previewEl) return;
+  const combos = [];
+  gs.currencies.forEach(c => gs.websites.forEach(w => combos.push(`${c} × ${w}`)));
+  if(combos.length > 1) {
+    previewEl.style.display = 'block';
+    tagsEl.innerHTML = combos.map(c=>`<span class="combo-tag">${c}</span>`).join('');
+  } else {
+    previewEl.style.display = 'none';
+  }
+}
+
+// ===================== TABLES MODAL =====================
+function openTablesModal(gameId, ctx) {
+  const game = GAMES.find(g=>g.id===gameId);
+  modalCtx.currentGame = gameId;
+  modalCtx.context = ctx;
+  const gs = ctx === 'edit' ? state.edit : state.add;
+  modalCtx.tempTables = [...(gs.gameTables[gameId] || [])];
+  document.getElementById('tables-modal-title').textContent = `Select Tables — ${game.name}`;
+  renderTablesModalBody(game);
+  document.getElementById('modal-tables').classList.add('open');
+}
+
+function renderTablesModalBody(game) {
+  let html = '';
+  
+  // Baccarat: don't group, show all tables together
+  if(game.id === 'baccarat' || game.id === 'extrasicbo' || game.id === 'sedie') {
+    html += `<div class="table-group">
+      <div class="table-group-title">${game.name} — All Tables</div>
+      <div class="table-chips">${game.tables.map(t=>`
+        <div class="table-chip${modalCtx.tempTables.includes(t)?' selected':''}" onclick="toggleTableChip('${t}')">${game.name.split(' ')[0]} ${t}</div>
+      `).join('')}</div>
+    </div>`;
+  } else {
+    // Other games: group by standard and C tables
+    const numTables = game.tables.filter(t=>!/^C/.test(t));
+    const cTables = game.tables.filter(t=>/^C/.test(t));
+    
+    if(numTables.length) {
+      html += `<div class="table-group">
+        <div class="table-group-title">${game.name} — Standard Tables</div>
+        <div class="table-chips">${numTables.map(t=>`
+          <div class="table-chip${modalCtx.tempTables.includes(t)?' selected':''}" onclick="toggleTableChip('${t}')">${game.name.split(' ')[0]} ${t}</div>
+        `).join('')}</div>
+      </div>`;
     }
+    if(cTables.length) {
+      html += `<div class="table-group">
+        <div class="table-group-title">${game.name} — C Tables</div>
+        <div class="table-chips">${cTables.map(t=>`
+          <div class="table-chip${modalCtx.tempTables.includes(t)?' selected':''}" onclick="toggleTableChip('${t}')">${game.name.split(' ')[0]} ${t}</div>
+        `).join('')}</div>
+      </div>`;
+    }
+  }
+  
+  html += `<div style="font-size:12px;color:var(--text-muted);margin-top:8px">${modalCtx.tempTables.length} table(s) selected</div>`;
+  document.getElementById('tables-modal-body').innerHTML = html;
+}
 
-    function loadFromStorage() {
-      const saved = localStorage.getItem('promotion-games');
-      if (saved) {
-        try {
-          state.configs = JSON.parse(saved);
-        } catch (e) {
-          console.error('Failed to load:', e);
-        }
+function toggleTableChip(tableId) {
+  if(modalCtx.tempTables.includes(tableId)) modalCtx.tempTables = modalCtx.tempTables.filter(t=>t!==tableId);
+  else modalCtx.tempTables.push(tableId);
+  const game = GAMES.find(g=>g.id===modalCtx.currentGame);
+  renderTablesModalBody(game);
+}
+
+function confirmTables() {
+  const ctx = modalCtx.context;
+  const gs = ctx === 'edit' ? state.edit : state.add;
+  gs.gameTables[modalCtx.currentGame] = [...modalCtx.tempTables];
+  // Rebuild sort order
+  rebuildSortOrder(ctx);
+  renderGamesGrid(ctx);
+  closeModal('tables');
+  // Clear error
+  const errEl = document.getElementById(`err-games-${ctx}`);
+  if(errEl && getAllSelectedTables(gs).length > 0) errEl.classList.remove('show');
+}
+
+function getAllSelectedTables(gs) {
+  const all = [];
+  GAMES.forEach(g => { (gs.gameTables[g.id]||[]).forEach(t => all.push({gameId:g.id, table:t})); });
+  return all;
+}
+
+function rebuildSortOrder(ctx) {
+  const gs = ctx === 'edit' ? state.edit : state.add;
+  // Keep existing order, add new, remove deselected
+  const all = getAllSelectedTables(gs);
+  const allKeys = all.map(x=>x.gameId+'::'+x.table);
+  // Filter removed
+  gs.sortOrder = gs.sortOrder.filter(k => allKeys.includes(k));
+  // Add new
+  allKeys.forEach(k => { if(!gs.sortOrder.includes(k)) gs.sortOrder.push(k); });
+  renderSortList(ctx);
+}
+
+// ===================== SORT LIST =====================
+function getGameName(gameId) { return (GAMES.find(g=>g.id===gameId)||{}).name || gameId; }
+function getTableLabel(key) {
+  const [gameId, table] = key.split('::');
+  const gameName = getGameName(gameId);
+  return `<span style="color:#6b7280">${gameName}</span> ${table}`;
+}
+
+function renderSortList(ctx) {
+  const el = document.getElementById('sort-list-'+ctx);
+  if(!el) return;
+  const gs = ctx === 'edit' ? state.edit : state.add;
+  if(!gs.sortOrder.length) {
+    el.innerHTML = '<div class="sort-empty">Selected tables will appear here for ordering.</div>';
+    return;
+  }
+  el.innerHTML = gs.sortOrder.map((key,i) => {
+    const [gameId] = key.split('::');
+    return `<div class="sort-item" draggable="true" data-key="${key}" data-idx="${i}" data-ctx="${ctx}"
+      ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)">
+      <span class="drag-handle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/></svg>
+      </span>
+      <span class="sort-item-label">${getTableLabel(key)}</span>
+    </div>`;
+  }).join('');
+}
+
+let dragSrcIdx = null, dragCtx = null;
+function dragStart(e) {
+  console.log('[DRAG] dragStart - idx:', e.currentTarget.dataset.idx, 'ctx:', e.currentTarget.dataset.ctx);
+  dragSrcIdx = +e.currentTarget.dataset.idx;
+  dragCtx = e.currentTarget.dataset.ctx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
+}
+function dragOver(e) {
+  console.log('[DRAG] dragOver - target idx:', e.currentTarget.dataset.idx);
+  e.preventDefault();
+  e.stopPropagation();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function drop(e) {
+  console.log('[DRAG] drop - dragSrcIdx:', dragSrcIdx, 'targetIdx:', e.currentTarget.dataset.idx);
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('drag-over');
+  const targetIdx = +e.currentTarget.dataset.idx;
+  if(dragSrcIdx === targetIdx || dragSrcIdx === null) return;
+  const gs = dragCtx === 'edit' ? state.edit : state.add;
+  const arr = gs.sortOrder;
+  const [moved] = arr.splice(dragSrcIdx, 1);
+  arr.splice(targetIdx, 0, moved);
+  renderSortList(dragCtx);
+}
+function dragEnd(e) { e.currentTarget.classList.remove("dragging"); }
+
+// ===================== FORM SAVE =====================
+function saveForm() {
+  const gs = state.add;
+  let valid = true;
+
+  if(!gs.currencies.length) {
+    document.getElementById('err-currency-add').classList.add('show');
+    document.getElementById('btn-currency-add').classList.add('invalid');
+    valid = false;
+  }
+  if(!gs.websites.length) {
+    document.getElementById('err-website-add').classList.add('show');
+    document.getElementById('btn-website-add').classList.add('invalid');
+    valid = false;
+  }
+  if(!getAllSelectedTables(gs).length) {
+    document.getElementById('err-games-add').classList.add('show');
+    valid = false;
+  }
+  if(!valid) return;
+
+  // Check for duplicate currency + website combinations
+  const duplicates = [];
+  gs.currencies.forEach(cur => {
+    gs.websites.forEach(web => {
+      const existing = savedData.find(d => d.currency === cur && d.website === web);
+      if(existing) {
+        duplicates.push(`${cur} + ${web}`);
       }
-    }
+    });
+  });
 
-    function saveToStorage() {
-      localStorage.setItem('promotion-games', JSON.stringify(state.configs));
-    }
+  if(duplicates.length > 0) {
+    const dupList = duplicates.join(', ');
+    showToast(`Cannot save: duplicate configurations found (${dupList})`, 'error');
+    return;
+  }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-      document.getElementById(tab).style.display = 'grid';
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      if (tab === 'view') applyFilters();
-    }
+  const now = new Date();
+  const editor = 'Admin';
 
-    function renderCurrencyCheckboxes() {
-      const grid = document.getElementById('currencyCheckboxes');
-      grid.innerHTML = CURRENCIES.map(curr => `
-        <label class="checkbox-item">
-          <input type="checkbox" value="${curr}" />
-          <span>${curr}</span>
-        </label>
-      `).join('');
-    }
+  gs.currencies.forEach(cur => {
+    gs.websites.forEach(web => {
+      const tables = gs.sortOrder.map(k=>getTableLabel(k));
+      savedData.push({ id: nextId++, currency: cur, website: web, tables, sortOrder: [...gs.sortOrder], lastEditor: editor, lastEditedTime: now });
+    });
+  });
 
-    function openCurrencyModal() {
-      document.querySelectorAll('#currencyCheckboxes input').forEach(inp => inp.checked = false);
-      state.selectedCurrencies.forEach(curr => {
-        const inp = document.querySelector(`#currencyCheckboxes input[value="${curr}"]`);
-        if (inp) inp.checked = true;
-      });
-      document.getElementById('currencyModal').classList.add('active');
-    }
+  // Sort by newest
+  savedData.sort((a,b) => b.lastEditedTime - a.lastEditedTime);
 
-    function closeCurrencyModal() {
-      document.getElementById('currencyModal').classList.remove('active');
-    }
+  showToast('Configurations saved successfully!', 'success');
+  resetForm('add');
+  switchTab('list');
+}
 
-    function confirmCurrency() {
-      const checked = Array.from(document.getElementById('currencyCheckboxes').querySelectorAll('input:checked'));
-      if (checked.length === 0) {
-        alert('請至少選擇一個幣別');
-        return;
-      }
-      state.selectedCurrencies = new Set(checked.map(inp => inp.value));
-      document.getElementById('currencyDisplay').textContent = Array.from(state.selectedCurrencies).join(', ');
-      document.getElementById('currencyError').style.display = 'none';
-      closeCurrencyModal();
-    }
+function resetForm(ctx) {
+  if(ctx === 'add') {
+    state.add = { currencies:[], websites:[], gameTables:{}, sortOrder:[] };
+    updateTriggerBtn('currency','add',[]);
+    updateTriggerBtn('website','add',[]);
+    document.getElementById('combo-preview-add').style.display = 'none';
+    renderGamesGrid('add');
+    renderSortList('add');
+    ['currency','website','games'].forEach(f => {
+      const el = document.getElementById(`err-${f}-add`);
+      if(el) el.classList.remove('show');
+    });
+    document.getElementById('btn-currency-add').classList.remove('invalid');
+    document.getElementById('btn-website-add').classList.remove('invalid');
+  }
+}
 
-    function renderWebsiteCheckboxes() {
-      const grid = document.getElementById('websiteCheckboxes');
-      grid.innerHTML = WEBSITES.map(web => `
-        <label class="checkbox-item">
-          <input type="checkbox" value="${web}" />
-          <span>${web}</span>
-        </label>
-      `).join('');
-    }
+// ===================== SEARCH =====================
+function doSearch() {
+  const gs = state.search;
+  if(!gs.currencies.length || !gs.websites.length) {
+    showToast('Please select both currency and website to search.', 'error');
+    return;
+  }
+  renderResults(gs.currencies, gs.websites);
+}
 
-    function openWebsiteModal() {
-      document.querySelectorAll('#websiteCheckboxes input').forEach(inp => inp.checked = false);
-      state.selectedWebsites.forEach(web => {
-        const inp = document.querySelector(`#websiteCheckboxes input[value="${web}"]`);
-        if (inp) inp.checked = true;
-      });
-      document.getElementById('websiteModal').classList.add('active');
-    }
+function resetSearch() {
+  state.search = { currencies:[], websites:[] };
+  updateTriggerBtn('currency','search',[]);
+  updateTriggerBtn('website','search',[]);
+  document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Select currency and website to search for results.</p></div>`;
+}
 
-    function closeWebsiteModal() {
-      document.getElementById('websiteModal').classList.remove('active');
-    }
+function renderResults(currencies, websites) {
+  const filtered = savedData.filter(d =>
+    (currencies.includes('__all__') || currencies.includes(d.currency)) &&
+    (websites.includes('__all__') || websites.includes(d.website))
+  );
 
-    function confirmWebsite() {
-      const checked = Array.from(document.getElementById('websiteCheckboxes').querySelectorAll('input:checked'));
-      if (checked.length === 0) {
-        alert('請至少選擇一個Website');
-        return;
-      }
-      state.selectedWebsites = new Set(checked.map(inp => inp.value));
-      document.getElementById('websiteDisplay').textContent = Array.from(state.selectedWebsites).join(', ');
-      document.getElementById('websiteError').style.display = 'none';
-      closeWebsiteModal();
-    }
+  if(!filtered.length) {
+    document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No results found for selected filters.</p></div>`;
+    return;
+  }
 
-    function renderGameTypes() {
-      const section = document.getElementById('gameTypesSection');
-      section.innerHTML = Object.entries(GAME_TYPES).map(([key, type]) => `
-        <div class="game-type-group">
-          <div class="game-type-name">${type.name}</div>
-          <div class="table-checkbox-grid">
-            ${type.tables.map(table => `
-              <label class="table-checkbox">
-                <input type="checkbox" value="${table}" onchange="updateSelectedTables()" />
-                <span>${table}</span>
-              </label>
-            `).join('')}
-          </div>
-        </div>
-      `).join('');
-    }
+  let html = `<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px">${filtered.length} result(s) found</div>
+  <div style="overflow-x:auto"><table class="results-table">
+    <thead><tr>
+      <th>Currency</th><th>Website</th><th>Table List</th><th>Last Editor</th><th>Last Edited Time</th><th>Actions</th>
+    </tr></thead>
+    <tbody>${filtered.map(row => `
+    <tr>
+      <td><span class="badge">${row.currency}</span></td>
+      <td style="font-size:13px">${row.website}</td>
+      <td><div class="table-list-cell">${row.tables.map(t=>`<span class="table-chip-sm">${t}</span>`).join('')}</div></td>
+      <td class="editor-cell">${row.lastEditor}</td>
+      <td class="time-cell">${formatTime(row.lastEditedTime)}</td>
+      <td><div class="action-cell">
+        <button class="btn btn-outline btn-sm" onclick="openEdit(${row.id})">Edit</button>
+        <button class="btn btn-sm" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" onclick="openDeleteConfirm(${row.id},'${row.currency} — ${row.website}')">Delete</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+  document.getElementById('results-area').innerHTML = html;
+}
 
-    function updateSelectedTables() {
-      const checked = Array.from(document.querySelectorAll('#gameTypesSection input:checked'));
-      state.selectedTables = checked.map(inp => inp.value);
-      renderSelectedTablesArea();
-      document.getElementById('tablesError').style.display = 'none';
-    }
+function formatTime(d) {
+  if(!d) return '-';
+  return d.toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
 
-    function renderSelectedTablesArea() {
-      const area = document.getElementById('selectedTablesArea');
-      if (state.selectedTables.length === 0) {
-        area.innerHTML = '<div style="color:var(--muted); font-size:13px; width:100%; text-align:center; line-height:60px;">尚未選擇桌子</div>';
-        return;
-      }
-      area.innerHTML = state.selectedTables.map((table, idx) => `
-        <div class="table-chip" draggable="true" data-index="${idx}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragend="dragEnd(event)">
-          <span>${table}</span>
-          <button class="close" onclick="removeTable('${table}')">×</button>
-        </div>
-      `).join('');
-    }
+// ===================== DELETE =====================
+function openDeleteConfirm(id, label) {
+  deleteTargetId = id;
+  document.getElementById('confirm-delete-label').textContent = label;
+  document.getElementById('modal-confirm').classList.add('open');
+}
 
-    function dragStart(e) {
-      state.dragFromIndex = parseInt(e.target.closest('.table-chip').dataset.index);
-      e.target.closest('.table-chip').classList.add('dragging');
-    }
-    function dragOver(e) { e.preventDefault(); }
-    function dragDrop(e) {
-      e.preventDefault();
-      const toIndex = parseInt(e.target.closest('.table-chip').dataset.index);
-      if (state.dragFromIndex !== toIndex) {
-        const [moved] = state.selectedTables.splice(state.dragFromIndex, 1);
-        state.selectedTables.splice(toIndex, 0, moved);
-        renderSelectedTablesArea();
-      }
-    }
-    function dragEnd(e) {
-      document.querySelectorAll('.table-chip').forEach(el => el.classList.remove('dragging'));
-    }
+function confirmDelete() {
+  savedData = savedData.filter(d => d.id !== deleteTargetId);
+  closeModal('confirm');
+  showToast('Configuration deleted.', 'success');
+  // Re-render with current search filters
+  const gs = state.search;
+  if(gs.currencies.length && gs.websites.length) renderResults(gs.currencies, gs.websites);
+  else document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Select currency and website to search for results.</p></div>`;
+}
 
-    function removeTable(table) {
-      state.selectedTables = state.selectedTables.filter(t => t !== table);
-      document.querySelector(`#gameTypesSection input[value="${table}"]`).checked = false;
-      renderSelectedTablesArea();
-    }
+// ===================== EDIT =====================
+function openEdit(id) {
+  const row = savedData.find(d=>d.id===id);
+  if(!row) return;
+  state.edit = {
+    id: row.id,
+    currencies: [row.currency],
+    websites: [row.website],
+    gameTables: {},
+    sortOrder: [...row.sortOrder]
+  };
+  // Rebuild gameTables from sortOrder
+  row.sortOrder.forEach(key => {
+    const [gameId, table] = key.split('::');
+    if(!state.edit.gameTables[gameId]) state.edit.gameTables[gameId] = [];
+    state.edit.gameTables[gameId].push(table);
+  });
 
-    function saveConfig() {
-      document.getElementById('currencyError').style.display = 'none';
-      document.getElementById('websiteError').style.display = 'none';
-      document.getElementById('tablesError').style.display = 'none';
+  document.getElementById('edit-modal-label').textContent = `${row.currency} — ${row.website}`;
+  renderEditModalBody();
+  document.getElementById('modal-edit').classList.add('open');
+}
 
-      let valid = true;
-      if (state.selectedCurrencies.size === 0) {
-        document.getElementById('currencyError').textContent = '必填';
-        document.getElementById('currencyError').style.display = 'block';
-        valid = false;
-      }
-      if (state.selectedWebsites.size === 0) {
-        document.getElementById('websiteError').textContent = '必填';
-        document.getElementById('websiteError').style.display = 'block';
-        valid = false;
-      }
-      if (state.selectedTables.length === 0) {
-        document.getElementById('tablesError').textContent = '至少選擇1個';
-        document.getElementById('tablesError').style.display = 'block';
-        valid = false;
-      }
+function renderEditModalBody() {
+  const gs = state.edit;
+  let html = `<div style="margin-bottom:18px">
+    <div class="section-title" style="margin-bottom:10px">Table Settings</div>
+    <div class="games-grid" id="games-grid-edit"></div>
+    <span class="field-error" id="err-games-edit" style="margin-top:8px">Please select at least one table.</span>
+  </div>
+  <hr class="divider" style="margin:16px 0">
+  <div class="section-title" style="margin-bottom:10px">Table Order <span style="font-size:11px;text-transform:none;font-weight:400;color:var(--text-muted)">— drag to reorder</span></div>
+  <div class="sort-list" id="sort-list-edit"></div>`;
+  document.getElementById('edit-modal-body').innerHTML = html;
+  
+  // Render immediately - event listeners will be properly attached
+  renderGamesGrid('edit');
+  renderSortList('edit');
+}
 
-      if (!valid) return;
+function saveEdit() {
+  const gs = state.edit;
+  if(!getAllSelectedTables(gs).length) {
+    document.getElementById('err-games-edit').classList.add('show');
+    return;
+  }
+  const row = savedData.find(d=>d.id===gs.id);
+  if(!row) return;
+  row.tables = gs.sortOrder.map(k=>getTableLabel(k));
+  row.sortOrder = [...gs.sortOrder];
+  row.lastEditor = 'Admin';
+  row.lastEditedTime = new Date();
+  savedData.sort((a,b)=>b.lastEditedTime-a.lastEditedTime);
+  closeModal('edit');
+  showToast('Configuration updated successfully!', 'success');
+  const s = state.search;
+  if(s.currencies.length && s.websites.length) renderResults(s.currencies, s.websites);
+}
 
-      // 檢查是否為編輯模式
-      if (state.editingKey) {
-        const [editCurr, editWeb] = state.editingKey.split('-');
-        const curr = Array.from(state.selectedCurrencies)[0];
-        const web = Array.from(state.selectedWebsites)[0];
-        
-        // 刪除舊的
-        delete state.configs[state.editingKey];
-        
-        // 如果幣別或 website 改了，檢查新組合是否重複
-        const newKey = `${curr}-${web}`;
-        if (newKey !== state.editingKey && state.configs[newKey]) {
-          alert(`${curr} + ${web} 有重複設置`);
-          return;
-        }
-        
-        // 保存新的
-        const now = new Date();
-        const lastEdited = now.toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
-        state.configs[newKey] = {
-          currency: curr,
-          website: web,
-          tables: [...state.selectedTables],
-          timestamp: new Date().toISOString(),
-          lastEditor: 'admin',
-          lastEdited: lastEdited
-        };
-        
-        saveToStorage();
-        alert('已更新');
-        state.editingKey = null;
-        resetForm();
-        switchTab('view');
-        return;
-      }
+// ===================== TOAST =====================
+function showToast(msg, type='success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `${type==='success'?'✓':'✕'} ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity='0'; toast.style.transform='translateY(8px)'; toast.style.transition='all 0.3s'; setTimeout(()=>toast.remove(),300); }, 2800);
+}
 
-      // 為每個 currency × website 組合創建配置
-      const currencies = Array.from(state.selectedCurrencies);
-      const websites = Array.from(state.selectedWebsites);
-      let duplicates = [];
+// ===================== INIT =====================
+// Prevent default drag behavior on document
+document.addEventListener('dragover', function(e) {
+  if (!e.target.closest('.sort-item')) {
+    e.preventDefault();
+  }
+}, false);
 
-      currencies.forEach(curr => {
-        websites.forEach(web => {
-          const key = `${curr}-${web}`;
-          if (state.configs[key]) {
-            duplicates.push(`${curr} + ${web}`);
-          }
-        });
-      });
+document.addEventListener('drop', function(e) {
+  if (!e.target.closest('.sort-item')) {
+    e.preventDefault();
+  }
+}, false);
 
-      if (duplicates.length > 0) {
-        alert(`以下組合有重複設置：\n${duplicates.join('\n')}`);
-        return;
-      }
+// renderGamesGrid('add'); // Will be called when switching to add tab
 
-      // 保存所有組合
-      const now = new Date();
-      const lastEdited = now.toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      
-      currencies.forEach(curr => {
-        websites.forEach(web => {
-          const key = `${curr}-${web}`;
-          state.configs[key] = {
-            currency: curr,
-            website: web,
-            tables: [...state.selectedTables],
-            timestamp: new Date().toISOString(),
-            lastEditor: 'admin',
-            lastEdited: lastEdited
-          };
-        });
-      });
-
-      saveToStorage();
-      alert(`已儲存 ${currencies.length} × ${websites.length} = ${currencies.length * websites.length} 個設置`);
-      resetForm();
-      populateFilters();
-      switchTab('view');
-    }
-
-    function resetForm() {
-      state.selectedCurrencies = new Set();
-      state.selectedWebsites = new Set();
-      state.selectedTables = [];
-      document.getElementById('currencyDisplay').textContent = '未選擇';
-      document.getElementById('websiteDisplay').textContent = '未選擇';
-      document.querySelectorAll('#gameTypesSection input').forEach(inp => inp.checked = false);
-      renderSelectedTablesArea();
-    }
-
-    function renderConfigList() {
-      // Empty - no longer used
-    }
-
-    function deleteConfig(key) {
-      if (confirm('確定刪除？')) {
-        delete state.configs[key];
-        saveToStorage();
-        populateFilters();
-      }
-    }
-
-    function populateFilters() {
-      const currencies = new Set(Object.values(state.configs).map(c => c.currency));
-      const websites = new Set(Object.values(state.configs).map(c => c.website));
-
-      const currFilter = document.getElementById('currencyFilter');
-      const webFilter = document.getElementById('websiteFilter');
-
-      const currOptions = Array.from(currencies).sort();
-      const webOptions = Array.from(websites).sort();
-
-      currFilter.innerHTML = '<option value="">全部</option>' + currOptions.map(c => `<option value="${c}">${c}</option>`).join('');
-      webFilter.innerHTML = '<option value="">全部</option>' + webOptions.map(w => `<option value="${w}">${w}</option>`).join('');
-    }
-
-    function applyFilters() {
-      const currFilter = document.getElementById('currencyFilter').value;
-      const webFilter = document.getElementById('websiteFilter').value;
-
-      let configs = Object.values(state.configs).filter(config => {
-        if (currFilter && config.currency !== currFilter) return false;
-        if (webFilter && config.website !== webFilter) return false;
-        return true;
-      });
-
-      // 按 lastEdited 時間由新到舊排序
-      configs.sort((a, b) => {
-        const timeA = new Date(a.lastEdited).getTime();
-        const timeB = new Date(b.lastEdited).getTime();
-        return timeB - timeA;
-      });
-
-      const grid = document.getElementById('resultsGrid');
-      if (configs.length === 0) {
-        grid.innerHTML = '<div class="empty-state">無符合結果</div>';
-        return;
-      }
-
-      grid.innerHTML = configs.map(config => {
-        const key = `${config.currency}-${config.website}`;
-        return `
-        <div class="result-card">
-          <div class="result-header">
-            <div>
-              <div class="result-label">幣別</div>
-              <div class="result-value">${config.currency}</div>
-            </div>
-            <div>
-              <div class="result-label">Website</div>
-              <div class="result-value">${config.website}</div>
-            </div>
-            <div>
-              <div class="result-label">桌子列表</div>
-              <div class="result-tables">
-                ${config.tables.map(table => `<span class="result-table">${table}</span>`).join('')}
-              </div>
-            </div>
-            <div>
-              <div class="result-label">Last Editor</div>
-              <div class="result-value" style="font-size:12px;">${config.lastEditor || 'N/A'}</div>
-            </div>
-            <div>
-              <div class="result-label">Last Edited Time</div>
-              <div class="result-value" style="font-size:12px;">${config.lastEdited || 'N/A'}</div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <button onclick="editConfig('${key}')" class="ghost" style="padding:6px 12px; font-size:12px;">修改</button>
-              <button onclick="deleteConfigItem('${key}')" class="ghost danger" style="padding:6px 12px; font-size:12px; color:#ef4444; border-color:#ef4444;">刪除</button>
-            </div>
-          </div>
-        </div>
-      `;
-      }).join('');
-    }
-
-    function editConfig(key) {
-      const config = state.configs[key];
-      if (!config) return;
-      state.selectedCurrencies = new Set([config.currency]);
-      state.selectedWebsites = new Set([config.website]);
-      state.selectedTables = [...config.tables];
-      state.editingKey = key;
-      document.getElementById('currencyDisplay').textContent = config.currency;
-      document.getElementById('websiteDisplay').textContent = config.website;
-      document.querySelectorAll('#gameTypesSection input').forEach(inp => {
-        inp.checked = config.tables.includes(inp.value);
-      });
-      renderSelectedTablesArea();
-      switchTab('add');
-    }
-
-    function deleteConfigItem(key) {
-      if (confirm('確定刪除？')) {
-        delete state.configs[key];
-        saveToStorage();
-        applyFilters();
-      }
-    }
-
-    init();
-
-    // 修復：若無配置，顯示所有幣別和Website
-    populateFilters = function() {
-      let c = new Set(Object.values(state.configs).map(x => x.currency));
-      let w = new Set(Object.values(state.configs).map(x => x.website));
-      if (!c.size) c = new Set(CURRENCIES);
-      if (!w.size) w = new Set(WEBSITES);
-      document.getElementById('currencyFilter').innerHTML = '<option value="">全部</option>' + Array.from(c).sort().map(x => `<option value="${x}">${x}</option>`).join('');
-      document.getElementById('websiteFilter').innerHTML = '<option value="">全部</option>' + Array.from(w).sort().map(x => `<option value="${x}">${x}</option>`).join('');
-    };
-
-    init();
-  </script>
+// Pre-populate some demo data
+(function seedDemo(){
+  const gs = { currencies:['SGD'], websites:['A01 website','A02 website'], gameTables:{
+    baccarat:['9','11'], extrasicbo:['131','C132'], roulette:['371']
+  }, sortOrder:['extrasicbo::C132','baccarat::9','roulette::371','baccarat::11','extrasicbo::131'] };
+  ['SGD'].forEach(cur => ['A01 website','A02 website'].forEach(web => {
+    savedData.push({ id:nextId++, currency:cur, website:web,
+      tables: gs.sortOrder.map(k=>{ const[g,t]=k.split('::'); return GAMES.find(x=>x.id===g).name.split(' ')[0]+' '+t; }),
+      sortOrder:[...gs.sortOrder], lastEditor:'System', lastEditedTime: new Date(Date.now()-3600000) });
+  }));
+  const gs2 = { sortOrder:['baccarat::1','baccarat::2','dragontiger::31'] };
+  ['MYR'].forEach(cur => ['A01 website'].forEach(web => {
+    savedData.push({ id:nextId++, currency:cur, website:web,
+      tables:['Baccarat 1','Baccarat 2','Dragon 31'], sortOrder:['baccarat::1','baccarat::2','dragontiger::31'],
+      lastEditor:'Admin', lastEditedTime: new Date(Date.now()-7200000) });
+  }));
+  savedData.sort((a,b)=>b.lastEditedTime-a.lastEditedTime);
+})();
+</script>
+</body>
+</html>
