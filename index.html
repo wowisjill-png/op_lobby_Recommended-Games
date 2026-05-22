@@ -624,7 +624,7 @@ function openTablesModal(gameId, ctx) {
   modalCtx.context = ctx;
   const gs = ctx === 'edit' ? state.edit : state.add;
   modalCtx.tempTables = [...(gs.gameTables[gameId] || [])];
-  document.getElementById('tables-modal-title').textContent = `Select Tables — ${game.name}`;
+  document.getElementById('tables-modal-title').textContent = `Select Tables`;
   renderTablesModalBody(game);
   document.getElementById('modal-tables').classList.add('open');
 }
@@ -635,7 +635,7 @@ function renderTablesModalBody(game) {
   // Baccarat: don't group, show all tables together
   if(game.id === 'baccarat' || game.id === 'extrasicbo' || game.id === 'sedie') {
     html += `<div class="table-group">
-      <div class="table-group-title">${game.name} — All Tables</div>
+      <div class="table-group-title">${game.name}</div>
       <div class="table-chips">${game.tables.map(t=>`
         <div class="table-chip${modalCtx.tempTables.includes(t)?' selected':''}" onclick="toggleTableChip('${t}')">${game.name.split(' ')[0]} ${t}</div>
       `).join('')}</div>
@@ -647,7 +647,7 @@ function renderTablesModalBody(game) {
     
     if(numTables.length) {
       html += `<div class="table-group">
-        <div class="table-group-title">${game.name} — Standard Tables</div>
+        <div class="table-group-title">${game.name}</div>
         <div class="table-chips">${numTables.map(t=>`
           <div class="table-chip${modalCtx.tempTables.includes(t)?' selected':''}" onclick="toggleTableChip('${t}')">${game.name.split(' ')[0]} ${t}</div>
         `).join('')}</div>
