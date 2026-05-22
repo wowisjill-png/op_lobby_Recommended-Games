@@ -203,10 +203,10 @@
 
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('view')">推廣遊戲列表</button>
-      <button class="tab-btn" onclick="switchTab('add')">新增推廣遊戲表</button>
+      <button class="tab-btn" onclick="switchTab('add')">新增</button>
     </div>
 
-    <!-- TAB 1: 查看  -->
+    <!-- TAB 1: 查看 -->
     <div id="view" class="tab-content" style="display:grid;">
       <div class="panel">
         <h2>搜尋結果</h2>
@@ -726,6 +726,16 @@
     }
 
     init();
+
+    // 修復：若無配置，顯示所有幣別和Website
+    populateFilters = function() {
+      let c = new Set(Object.values(state.configs).map(x => x.currency));
+      let w = new Set(Object.values(state.configs).map(x => x.website));
+      if (!c.size) c = new Set(CURRENCIES);
+      if (!w.size) w = new Set(WEBSITES);
+      document.getElementById('currencyFilter').innerHTML = '<option value="">全部</option>' + Array.from(c).sort().map(x => `<option value="${x}">${x}</option>`).join('');
+      document.getElementById('websiteFilter').innerHTML = '<option value="">全部</option>' + Array.from(w).sort().map(x => `<option value="${x}">${x}</option>`).join('');
+    };
+
+    init();
   </script>
-</body>
-</html>
