@@ -153,6 +153,7 @@
   .btn-outline { background: transparent; color: var(--text-muted); border-color: var(--border); }
   .btn-outline:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface); }
   .btn-sm { padding: 5px 14px; font-size: 12.5px; }
+  .btn-disabled { opacity: 0.4; cursor: not-allowed !important; pointer-events: none; }
 
   /* Modal Overlay */
   .modal-overlay {
@@ -243,6 +244,25 @@
   .field-error.show { display: block; }
   .trigger-btn.invalid { border-color: var(--danger); }
 
+  /* Status Select */
+  .status-select {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px; background: var(--bg);
+    color: var(--text); font-family: 'DM Sans', sans-serif; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .status-select:hover { border-color: var(--primary); }
+  .status-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,141,184,0.08); }
+
+  /* Status Badge */
+  .status-badge {
+    display: inline-flex; align-items: center; padding: 3px 9px;
+    border-radius: 4px; font-size: 12px; font-weight: 500;
+  }
+  .status-badge.draft { background: #f3f4f6; color: #6b7280; }
+  .status-badge.published { background: #d1fae5; color: #065f46; }
+  .status-badge.archived { background: #fee2e2; color: #991b1b; }
+
   /* Combinations preview */
   .combo-preview { margin-top: 12px; }
   .combo-preview-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
@@ -274,11 +294,6 @@
 
     <!-- ADD TAB -->
     <div class="tab-content" id="content-add">
-      <div class="info-box">
-        <strong>Note:</strong> Selecting multiple currencies and websites will create separate configurations for each combination.
-        e.g. SGD + MYR × A01 + A02 = 4 configurations saved individually.
-      </div>
-
       <div class="section-title">Basic Configuration</div>
       <div class="form-row">
         <div class="form-group">
@@ -297,6 +312,14 @@
           </button>
           <span class="field-error" id="err-website-add">Please select at least one website.</span>
         </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select class="status-select" id="status-add">
+            <option value="draft" selected>Not Live</option>
+            <option value="published">Live</option>
+            <option value="archived">Offline</option>
+          </select>
+        </div>
       </div>
 
       <div id="combo-preview-add" class="combo-preview" style="display:none">
@@ -305,7 +328,7 @@
       </div>
 
       <hr class="divider">
-      <div class="section-title">Table Settings <span class="req" style="font-size:11px;text-transform:none;font-weight:400;letter-spacing:0">* At least 1 table required total</span></div>
+      <div class="section-title">Table Settings <span class="req" style="font-size:11px;text-transform:none;font-weight:400;letter-spacing:0;color:var(--danger)">* At least 1 table required total</span></div>
       <div class="games-grid" id="games-grid-add"></div>
       <span class="field-error" id="err-games-add" style="margin-top:8px">Please select at least one table.</span>
 
@@ -479,8 +502,12 @@ let state = {
   edit: { id: null, currencies: [], websites: [], gameTables: {}, sortOrder: [] }
 };
 
-let savedData = []; // { id, currency, website, tables, lastEditor, lastEditedTime }
-let nextId = 1;
+let savedData = [
+  { id: 1, currency: 'USD', website: 'A01 website', tables: ['<span style="color:#6b7280">Baccarat</span> 1', '<span style="color:#6b7280">Baccarat</span> 5', '<span style="color:#6b7280">Dragon Tiger</span> 31'], sortOrder: ['baccarat::1', 'baccarat::5', 'dragontiger::31'], status: 'draft', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-20T10:30:00') },
+  { id: 2, currency: 'EUR', website: 'A02 website', tables: ['<span style="color:#6b7280">Roulette</span> 71', '<span style="color:#6b7280">Roulette</span> 72'], sortOrder: ['roulette::71', 'roulette::72'], status: 'published', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-21T14:15:00') },
+  { id: 3, currency: 'CNY', website: 'A03 website', tables: ['<span style="color:#6b7280">Baccarat</span> 2', '<span style="color:#6b7280">Baccarat</span> C01', '<span style="color:#6b7280">Dragon Tiger</span> 32'], sortOrder: ['baccarat::2', 'baccarat::C01', 'dragontiger::32'], status: 'archived', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-19T09:00:00') }
+]; // { id, currency, website, tables, sortOrder, status, lastEditor, lastEditedTime }
+let nextId = 4;
 
 // Modal context
 let modalCtx = { type: null, context: null, tempSelected: [], currentGame: null, tempTables: [] };
@@ -804,11 +831,12 @@ function saveForm() {
 
   const now = new Date();
   const editor = 'Admin';
+  const status = document.getElementById('status-add').value;
 
   gs.currencies.forEach(cur => {
     gs.websites.forEach(web => {
       const tables = gs.sortOrder.map(k=>getTableLabel(k));
-      savedData.push({ id: nextId++, currency: cur, website: web, tables, sortOrder: [...gs.sortOrder], lastEditor: editor, lastEditedTime: now });
+      savedData.push({ id: nextId++, currency: cur, website: web, tables, sortOrder: [...gs.sortOrder], status, lastEditor: editor, lastEditedTime: now });
     });
   });
 
@@ -826,6 +854,7 @@ function resetForm(ctx) {
     updateTriggerBtn('currency','add',[]);
     updateTriggerBtn('website','add',[]);
     document.getElementById('combo-preview-add').style.display = 'none';
+    document.getElementById('status-add').value = 'draft';
     renderGamesGrid('add');
     renderSortList('add');
     ['currency','website','games'].forEach(f => {
@@ -868,20 +897,27 @@ function renderResults(currencies, websites) {
   let html = `<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px">${filtered.length} result(s) found</div>
   <div style="overflow-x:auto"><table class="results-table">
     <thead><tr>
-      <th>Currency</th><th>Website</th><th>Table List</th><th>Last Editor</th><th>Last Edited Time</th><th>Actions</th>
+      <th>Currency</th><th>Website</th><th>Table List</th><th>Status</th><th>Last Editor</th><th>Last Edited Time</th><th>Actions</th>
     </tr></thead>
-    <tbody>${filtered.map(row => `
+    <tbody>${filtered.map(row => {
+      const statusText = row.status === 'published' ? 'Live' : row.status === 'archived' ? 'Offline' : 'Not Live';
+      const statusClass = row.status || 'draft';
+      const isLive = row.status === 'published';
+      return `
     <tr>
       <td><span class="badge">${row.currency}</span></td>
       <td style="font-size:13px">${row.website}</td>
       <td><div class="table-list-cell">${row.tables.map(t=>`<span class="table-chip-sm">${t}</span>`).join('')}</div></td>
+      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
       <td class="editor-cell">${row.lastEditor}</td>
       <td class="time-cell">${formatTime(row.lastEditedTime)}</td>
       <td><div class="action-cell">
-        <button class="btn btn-outline btn-sm" onclick="openEdit(${row.id})">Edit</button>
-        <button class="btn btn-sm" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" onclick="openDeleteConfirm(${row.id},'${row.currency} — ${row.website}')">Delete</button>
+        <button class="btn btn-outline btn-sm${isLive?' btn-disabled':''}" onclick="openEdit(${row.id})">Edit</button>
+        <button class="btn btn-sm${isLive?' btn-disabled':''}" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" onclick="openDeleteConfirm(${row.id},'${row.currency} — ${row.website}')">Delete</button>
+        ${isLive ? `<button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border-color:#fde68a" onclick="removeConfiguration(${row.id})">Set Offline</button>` : ''}
       </div></td>
-    </tr>`).join('')}
+    </tr>`;
+    }).join('')}
     </tbody>
   </table></div>`;
   document.getElementById('results-area').innerHTML = html;
@@ -892,8 +928,31 @@ function formatTime(d) {
   return d.toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
+// ===================== REMOVE CONFIGURATION =====================
+function removeConfiguration(id) {
+  const row = savedData.find(d => d.id === id);
+  if(!row) return;
+  row.status = 'archived';
+  row.lastEditor = 'Admin';
+  row.lastEditedTime = new Date();
+  savedData.sort((a,b)=>b.lastEditedTime-a.lastEditedTime);
+  showToast('Configuration set to offline successfully!', 'success');
+  // Re-render with current search filters
+  const gs = state.search;
+  if(gs.currencies.length && gs.websites.length) renderResults(gs.currencies, gs.websites);
+}
+
 // ===================== DELETE =====================
 function openDeleteConfirm(id, label) {
+  const row = savedData.find(d => d.id === id);
+  if(!row) return;
+  
+  // Check if status is published (in use)
+  if(row.status === 'published') {
+    showToast('使用中的配置無法刪除', 'error');
+    return;
+  }
+  
   deleteTargetId = id;
   document.getElementById('confirm-delete-label').textContent = label;
   document.getElementById('modal-confirm').classList.add('open');
@@ -913,12 +972,14 @@ function confirmDelete() {
 function openEdit(id) {
   const row = savedData.find(d=>d.id===id);
   if(!row) return;
+  
   state.edit = {
     id: row.id,
     currencies: [row.currency],
     websites: [row.website],
     gameTables: {},
-    sortOrder: [...row.sortOrder]
+    sortOrder: [...row.sortOrder],
+    status: row.status || 'draft'
   };
   // Rebuild gameTables from sortOrder
   row.sortOrder.forEach(key => {
@@ -935,6 +996,14 @@ function openEdit(id) {
 function renderEditModalBody() {
   const gs = state.edit;
   let html = `<div style="margin-bottom:18px">
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--text)">Status</label>
+      <select class="status-select" id="status-edit">
+        <option value="draft" ${gs.status==='draft'?'selected':''}>Not Live</option>
+        <option value="published" ${gs.status==='published'?'selected':''}>Live</option>
+        <option value="archived" ${gs.status==='archived'?'selected':''}>Offline</option>
+      </select>
+    </div>
     <div class="section-title" style="margin-bottom:10px">Table Settings</div>
     <div class="games-grid" id="games-grid-edit"></div>
     <span class="field-error" id="err-games-edit" style="margin-top:8px">Please select at least one table.</span>
@@ -959,6 +1028,7 @@ function saveEdit() {
   if(!row) return;
   row.tables = gs.sortOrder.map(k=>getTableLabel(k));
   row.sortOrder = [...gs.sortOrder];
+  row.status = document.getElementById('status-edit').value;
   row.lastEditor = 'Admin';
   row.lastEditedTime = new Date();
   savedData.sort((a,b)=>b.lastEditedTime-a.lastEditedTime);
