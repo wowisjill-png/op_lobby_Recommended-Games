@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Group › Recommended Games</title>
+<title>Game Group › Lobby Promotion Management</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
@@ -153,7 +153,7 @@
   .btn-outline { background: transparent; color: var(--text-muted); border-color: var(--border); }
   .btn-outline:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface); }
   .btn-sm { padding: 5px 14px; font-size: 12.5px; }
-  .btn-disabled { opacity: 0.4; cursor: not-allowed !important; pointer-events: none; }
+  .btn-disabled { opacity: 0.4; cursor: not-allowed !important; }
 
   /* Modal Overlay */
   .modal-overlay {
@@ -208,7 +208,7 @@
   .results-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
   .results-table tr:last-child td { border-bottom: none; }
   .results-table tr:hover td { background: #fafbfc; }
-  .table-list-cell { display: flex; flex-wrap: wrap; gap: 4px; }
+  .table-list-cell { display: flex; flex-wrap: wrap; gap: 4px; max-width: 250px; }
   .table-chip-sm { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 11.5px; font-family: 'DM Mono', monospace; }
   .time-cell { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
   .editor-cell { font-size: 12.5px; font-weight: 500; }
@@ -284,53 +284,91 @@
 
 <div class="page-wrapper">
   <div class="env-banner"><span class="env-dot"></span>ENV: Staging</div>
-  <div class="breadcrumb">Game Group <span>›</span> Recommended Games</div>
+  <div class="breadcrumb">Game Group <span>›</span> Lobby Promotion Management</div>
 
   <div class="card">
     <div class="tabs">
-      <div class="tab active" id="tab-list" onclick="switchTab('list')">Recommended Games List</div>
-      <div class="tab" id="tab-add" onclick="switchTab('add')">Add Recommended Game</div>
+      <div class="tab active" id="tab-list" onclick="switchTab('list')">Promotion Assignment</div>
+      <div class="tab" id="tab-add" onclick="switchTab('add')">Promotion Content</div>
     </div>
 
     <!-- ADD TAB -->
     <div class="tab-content" id="content-add">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+        <button class="btn btn-primary" onclick="openAddModal()">+ New</button>
+      </div>
+      <div id="results-area">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p>No promotion content yet. Click "+ New" to add one.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST TAB -->
+    <div class="tab-content active" id="content-list">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+        <button class="btn btn-primary" onclick="openAssignmentModal()">+ New</button>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="form-group" style="min-width:160px;margin-bottom:0">
+          <label>Currency</label>
+          <button class="trigger-btn" id="btn-currency-search" onclick="openModal('currency','search')">
+            <span class="selected-tags" id="currency-tags-search"><span class="placeholder">Select currencies...</span></span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="form-group" style="min-width:160px;margin-bottom:0">
+          <label>Website</label>
+          <button class="trigger-btn" id="btn-website-search" onclick="openModal('website','search')">
+            <span class="selected-tags" id="website-tags-search"><span class="placeholder">Select websites...</span></span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <button class="btn btn-primary" onclick="doAssignmentSearch()">Search</button>
+        <button class="btn btn-reset" onclick="resetAssignmentSearch()">Reset</button>
+      </div>
+      <div id="assignment-results-area">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p>No promotion assignments yet. Click "+ New" to add one.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Lobby Config Modal -->
+<div class="modal-overlay" id="modal-add-content" style="z-index:1050">
+  <div class="modal" style="width:680px;max-height:92vh">
+    <div class="modal-header">
+      <span class="modal-title">New Promotion Content</span>
+      <button class="modal-close" onclick="closeAddModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto">
       <div class="section-title">Basic Configuration</div>
       <div class="form-row">
         <div class="form-group">
-          <label>Currency <span class="req">*</span></label>
-          <button class="trigger-btn" id="btn-currency-add" onclick="openModal('currency','add')">
-            <span class="selected-tags" id="currency-tags-add"><span class="placeholder">Select currencies...</span></span>
+          <label>Group Key <span class="req">*</span></label>
+          <button class="trigger-btn" id="btn-groupkey-add" onclick="openModal('groupkey','add')">
+            <span class="selected-tags" id="groupkey-tags-add"><span class="placeholder">Select group key...</span></span>
             <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <span class="field-error" id="err-currency-add">Please select at least one currency.</span>
+          <span class="field-error" id="err-groupkey-add">Please select a group key.</span>
         </div>
         <div class="form-group">
-          <label>Website <span class="req">*</span></label>
-          <button class="trigger-btn" id="btn-website-add" onclick="openModal('website','add')">
-            <span class="selected-tags" id="website-tags-add"><span class="placeholder">Select websites...</span></span>
-            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <span class="field-error" id="err-website-add">Please select at least one website.</span>
+          <label>Tag</label>
+          <input type="text" class="status-select" id="recommended-name-add" maxlength="30" placeholder="Enter tag (optional)">
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Max 30 characters</div>
         </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select class="status-select" id="status-add">
-            <option value="draft" selected>Not Live</option>
-            <option value="published">Live</option>
-            <option value="archived">Offline</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="combo-preview-add" class="combo-preview" style="display:none">
-        <div class="combo-preview-title">Will create combinations:</div>
-        <div class="combo-tags" id="combo-tags-add"></div>
       </div>
 
       <hr class="divider">
       <div class="section-title">Table Settings <span class="req" style="font-size:11px;text-transform:none;font-weight:400;letter-spacing:0;color:var(--danger)">* At least 1 table required total</span></div>
       <div class="games-grid" id="games-grid-add"></div>
-      <span class="field-error" id="err-games-add" style="margin-top:8px">Please select at least one table.</span>
+      <span class="field-error" id="err-games-add" style="margin-top:8px;display:none">Please select at least one table.</span>
 
       <hr class="divider">
       <div class="section-title">
@@ -345,47 +383,17 @@
       <div class="sort-list" id="sort-list-add">
         <div class="sort-empty">Selected tables will appear here for ordering.</div>
       </div>
-
-      <div class="btn-row">
-        <button class="btn btn-reset" onclick="resetForm('add')">Reset</button>
-        <button class="btn btn-primary" onclick="saveForm()">Save</button>
-      </div>
     </div>
-
-    <!-- LIST TAB -->
-    <div class="tab-content active" id="content-list">
-      <div class="section-title">Search</div>
-      <div class="search-bar">
-        <div class="form-group">
-          <label>Currency <span class="req">*</span></label>
-          <button class="trigger-btn" id="btn-currency-search" onclick="openModal('currency','search')">
-            <span class="selected-tags" id="currency-tags-search"><span class="placeholder">Select currencies...</span></span>
-            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-        </div>
-        <div class="form-group">
-          <label>Website <span class="req">*</span></label>
-          <button class="trigger-btn" id="btn-website-search" onclick="openModal('website','search')">
-            <span class="selected-tags" id="website-tags-search"><span class="placeholder">Select websites...</span></span>
-            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-        </div>
-        <button class="btn btn-primary" onclick="doSearch()">Search</button>
-        <button class="btn btn-reset" onclick="resetSearch()">Reset</button>
-      </div>
-
-      <div id="results-area">
-        <div class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <p>Select currency and website to search for results.</p>
-        </div>
-      </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="resetForm('add')">Reset</button>
+      <button class="btn btn-outline btn-sm" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveForm()">Save</button>
     </div>
   </div>
 </div>
 
 <!-- Currency Modal -->
-<div class="modal-overlay" id="modal-currency">
+<div class="modal-overlay" id="modal-currency" style="z-index:1200">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">Select Currency</span>
@@ -405,7 +413,7 @@
 </div>
 
 <!-- Website Modal -->
-<div class="modal-overlay" id="modal-website">
+<div class="modal-overlay" id="modal-website" style="z-index:1200">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">Select Website</span>
@@ -420,6 +428,25 @@
     <div class="modal-footer">
       <button class="btn btn-outline btn-sm" onclick="closeModal('website')">Cancel</button>
       <button class="btn btn-primary btn-sm" onclick="confirmModal('website')">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Group Key Modal -->
+<div class="modal-overlay" id="modal-groupkey" style="z-index: 1100">
+  <div class="modal" style="width:380px">
+    <div class="modal-header">
+      <span class="modal-title">Select Group Key</span>
+      <button class="modal-close" onclick="closeModal('groupkey')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="check-list" id="groupkey-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('groupkey')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmModal('groupkey')">Confirm</button>
     </div>
   </div>
 </div>
@@ -448,8 +475,8 @@
       <div class="confirm-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </div>
-      <div class="confirm-title">Delete Configuration</div>
-      <div class="confirm-text">Are you sure you want to delete <strong id="confirm-delete-label"></strong>?<br>This action cannot be undone.</div>
+      <div class="confirm-title">Delete</div>
+      <div class="confirm-text">Delete <strong id="confirm-delete-label"></strong>?<br>This action cannot be undone.</div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline btn-sm" onclick="closeModal('confirm')">Cancel</button>
@@ -462,7 +489,7 @@
 <div class="modal-overlay" id="modal-edit">
   <div class="modal" style="width:640px;max-height:90vh">
     <div class="modal-header">
-      <span class="modal-title">Edit Configuration — <span id="edit-modal-label"></span></span>
+      <span class="modal-title">Edit — <span id="edit-modal-label"></span></span>
       <button class="modal-close" onclick="closeModal('edit')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -475,12 +502,127 @@
   </div>
 </div>
 
+<!-- Edit Assignment Modal -->
+<div class="modal-overlay" id="modal-edit-assignment" style="z-index:1050">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Edit Promotion Assignment</span>
+      <button class="modal-close" onclick="closeEditAssignmentModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" id="ea-currency-group">
+        <label>Currency <span class="req">*</span></label>
+        <button class="trigger-btn" id="btn-currency-ea" onclick="openModal('currency','ea')">
+          <span class="selected-tags" id="currency-tags-ea"><span class="placeholder">Select currencies...</span></span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <span class="field-error" id="err-currency-ea">Please select at least one currency.</span>
+      </div>
+      <div class="form-group" id="ea-website-group">
+        <label>Website <span class="req">*</span></label>
+        <button class="trigger-btn" id="btn-website-ea" onclick="openModal('website','ea')">
+          <span class="selected-tags" id="website-tags-ea"><span class="placeholder">Select websites...</span></span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <span class="field-error" id="err-website-ea">Please select at least one website.</span>
+      </div>
+      <div class="form-group">
+        <label>Group Key <span class="req">*</span></label>
+        <select class="status-select" id="ea-groupkey">
+          <option value="group02">group02</option>
+          <option value="group03">group03</option>
+          <option value="group04">group04</option>
+          <option value="group05">group05</option>
+          <option value="group06">group06</option>
+          <option value="group07">group07</option>
+          <option value="group08">group08</option>
+          <option value="group09">group09</option>
+          <option value="group10">group10</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="status-select" id="ea-status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="offline">Offline</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeEditAssignmentModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEditAssignment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment Modal -->
+<div class="modal-overlay" id="modal-assignment">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">New Promotion Assignment</span>
+      <button class="modal-close" onclick="closeAssignmentModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Currency <span class="req">*</span></label>
+        <button class="trigger-btn" id="btn-currency-assignment" onclick="openModal('currency','assignment')">
+          <span class="selected-tags" id="currency-tags-assignment"><span class="placeholder">Select currencies...</span></span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <span class="field-error" id="err-currency-assignment">Please select at least one currency.</span>
+      </div>
+      <div class="form-group">
+        <label>Website <span class="req">*</span></label>
+        <button class="trigger-btn" id="btn-website-assignment" onclick="openModal('website','assignment')">
+          <span class="selected-tags" id="website-tags-assignment"><span class="placeholder">Select websites...</span></span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <span class="field-error" id="err-website-assignment">Please select at least one website.</span>
+      </div>
+      <div class="form-group">
+        <label>Group Key <span class="req">*</span></label>
+        <select class="status-select" id="groupkey-assignment" onchange="this.style.borderColor='';document.getElementById('err-groupkey-assignment').classList.remove('show')">
+          <option value="">Select group key...</option>
+          <option value="group02">group02</option>
+          <option value="group03">group03</option>
+          <option value="group04">group04</option>
+          <option value="group05">group05</option>
+          <option value="group06">group06</option>
+          <option value="group07">group07</option>
+          <option value="group08">group08</option>
+          <option value="group09">group09</option>
+          <option value="group10">group10</option>
+        </select>
+        <span class="field-error" id="err-groupkey-assignment">Please select a group key.</span>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="status-select" id="status-assignment">
+          <option value="active">Active</option>
+          <option value="inactive" selected>Inactive</option>
+          <option value="offline">Offline</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeAssignmentModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAssignment()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container"></div>
 
 <script>
 // ===================== DATA =====================
 const CURRENCIES = ['SGD','MYR','HKD','CNY','JPY','AUD','IDR','USD','KRW','THB','TWD','VND','NZD','PTI','PTV','INR','PHP','EUR','MNT','RUB','MMK','AED'];
 const WEBSITES = ['A01 website','A02 website','A03 website','A04 website','A05 website','A06 website','A07 website','A08 website','A09 website','A010 website','B01 website','B02 website','B03 website','B04 website','B05 website'];
+const GROUPKEYS = ['group02','group03','group04','group05','group06','group07','group08','group09','group10'];
 
 function genTables(prefix, start, end) {
   const arr = [];
@@ -495,19 +637,47 @@ const GAMES = [
   { id:'roulette', name:'Roulette', tables: ['71','72','371','571'] },
 ];
 
+// Generate Recommended ID
+let recommendedIdCounter = 1;
+function generateRecommendedId() {
+  const id = 'W' + String(recommendedIdCounter).padStart(5, '0');
+  recommendedIdCounter++;
+  return id;
+}
+
 // State
 let state = {
-  add: { currencies: [], websites: [], gameTables: {}, sortOrder: [] },
-  search: { currencies: [], websites: [] },
-  edit: { id: null, currencies: [], websites: [], gameTables: {}, sortOrder: [] }
+  add: { currencies: [], websites: [], groupKey: '', gameTables: {}, sortOrder: [] },
+  search: { currencies: [...CURRENCIES], websites: [...WEBSITES] },
+  edit: { id: null, currencies: [], websites: [], groupKey: '', gameTables: {}, sortOrder: [] },
+  assignment: { currencies: [], websites: [] },
+  ea: { currencies: [], websites: [] }
 };
 
+// Promotion Assignments data
+let promotionAssignments = [
+  { id: 0,    promotionId: 'P0000', currency: 'default',     website: 'default',      groupKey: 'group02', status: 'active',   isDefault: true, lastEditor: 'System', lastEditedTime: new Date('2026-01-01T00:00:00') },
+  { id: 1001, promotionId: 'P0001', currency: 'USD',         website: 'A01 website',  groupKey: 'group03', status: 'active',   lastEditor: 'Admin',  lastEditedTime: new Date('2026-05-10T09:00:00') },
+  { id: 1002, promotionId: 'P0002', currency: 'EUR',         website: 'A02 website',  groupKey: 'group04', status: 'active',   lastEditor: 'Admin',  lastEditedTime: new Date('2026-05-11T11:30:00') },
+  { id: 1003, promotionId: 'P0003', currency: 'CNY',         website: 'A03 website',  groupKey: 'group03', status: 'inactive', lastEditor: 'Admin',  lastEditedTime: new Date('2026-05-12T14:00:00') },
+  { id: 1004, promotionId: 'P0004', currency: 'THB',         website: 'A04 website',  groupKey: 'group05', status: 'inactive', lastEditor: 'Admin',  lastEditedTime: new Date('2026-05-13T16:45:00') },
+  { id: 1005, promotionId: 'P0005', currency: 'VND',         website: 'A05 website',  groupKey: 'group05', status: 'offline',  lastEditor: 'Admin',  lastEditedTime: new Date('2026-05-14T08:20:00') },
+];
+let promotionIdCounter = 6;
+function generatePromotionId() {
+  const id = 'P' + String(promotionIdCounter).padStart(4, '0');
+  promotionIdCounter++;
+  return id;
+}
+
 let savedData = [
-  { id: 1, currency: 'USD', website: 'A01 website', tables: ['<span style="color:#6b7280">Baccarat</span> 1', '<span style="color:#6b7280">Baccarat</span> 5', '<span style="color:#6b7280">Dragon Tiger</span> 31'], sortOrder: ['baccarat::1', 'baccarat::5', 'dragontiger::31'], status: 'draft', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-20T10:30:00') },
-  { id: 2, currency: 'EUR', website: 'A02 website', tables: ['<span style="color:#6b7280">Roulette</span> 71', '<span style="color:#6b7280">Roulette</span> 72'], sortOrder: ['roulette::71', 'roulette::72'], status: 'published', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-21T14:15:00') },
-  { id: 3, currency: 'CNY', website: 'A03 website', tables: ['<span style="color:#6b7280">Baccarat</span> 2', '<span style="color:#6b7280">Baccarat</span> C01', '<span style="color:#6b7280">Dragon Tiger</span> 32'], sortOrder: ['baccarat::2', 'baccarat::C01', 'dragontiger::32'], status: 'archived', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-19T09:00:00') }
-]; // { id, currency, website, tables, sortOrder, status, lastEditor, lastEditedTime }
-let nextId = 4;
+  { id: 1, recommendedId: 'W00002', recommendedName: 'VIP Tables',  tag: 'VIP Tables',  currency: 'USD', website: 'A01 website', tables: ['<span style="color:#6b7280">Baccarat</span> 1', '<span style="color:#6b7280">Baccarat</span> 5', '<span style="color:#6b7280">Dragon Tiger</span> 31'], sortOrder: ['baccarat::1', 'baccarat::5', 'dragontiger::31'], status: 'draft', groupKey: 'group02', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-20T10:30:00') },
+  { id: 2, recommendedId: 'W00003', recommendedName: 'TOP Game',    tag: 'TOP Game',    currency: 'CNY', website: 'A03 website', tables: ['<span style="color:#6b7280">Baccarat</span> 2', '<span style="color:#6b7280">Baccarat</span> C01', '<span style="color:#6b7280">Dragon Tiger</span> 32'], sortOrder: ['baccarat::2', 'baccarat::C01', 'dragontiger::32'], status: 'draft', groupKey: 'group03', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-19T09:00:00') },
+  { id: 3, recommendedId: 'W00004', recommendedName: 'SuperSexy',   tag: 'SuperSexy',   currency: 'EUR', website: 'A02 website', tables: ['<span style="color:#6b7280">Roulette</span> 71', '<span style="color:#6b7280">Roulette</span> 72'], sortOrder: ['roulette::71', 'roulette::72'], status: 'draft', groupKey: 'group04', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-21T14:15:00') },
+  { id: 4, recommendedId: 'W00005', recommendedName: 'Asia Hall',   tag: 'Asia Hall',   currency: 'THB', website: 'A04 website', tables: ['<span style="color:#6b7280">Baccarat</span> 3', '<span style="color:#6b7280">Sedie</span> 151'], sortOrder: ['baccarat::3', 'sedie::151'], status: 'draft', groupKey: 'group05', lastEditor: 'Admin', lastEditedTime: new Date('2026-05-18T08:00:00') },
+]; // { id, recommendedId, recommendedName, tag, currency, website, tables, sortOrder, status, groupKey, lastEditor, lastEditedTime }
+let nextId = 5;
+recommendedIdCounter = 6;
 
 // Modal context
 let modalCtx = { type: null, context: null, tempSelected: [], currentGame: null, tempTables: [] };
@@ -547,8 +717,12 @@ function renderGamesGrid(ctx) {
 function openModal(type, ctx) {
   modalCtx.type = type;
   modalCtx.context = ctx;
-  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : state.add);
-  modalCtx.tempSelected = [...(type === 'currency' ? gs.currencies : gs.websites)];
+  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : (ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : state.add)));
+  if(type === 'groupkey') {
+    modalCtx.tempSelected = gs.groupKey ? [gs.groupKey] : [];
+  } else {
+    modalCtx.tempSelected = [...(type === 'currency' ? gs.currencies : gs.websites)];
+  }
   renderCheckList(type, modalCtx.tempSelected);
   document.getElementById('modal-'+type).classList.add('open');
 }
@@ -564,23 +738,62 @@ function filterModal(type, val) {
 }
 
 function renderCheckList(type, selected, filter='') {
-  const items = type === 'currency' ? CURRENCIES : WEBSITES;
+  const items = type === 'currency' ? CURRENCIES : type === 'website' ? WEBSITES : GROUPKEYS;
   const visible = filter ? items.filter(i => i.toLowerCase().includes(filter)) : items;
-  const allChecked = visible.length > 0 && visible.every(i => selected.includes(i));
-  let html = `<div class="check-all"><div class="check-item">
-    <input type="checkbox" id="chk-all-${type}" ${allChecked?'checked':''} onchange="toggleAll('${type}')">
-    <label for="chk-all-${type}">Select All ${filter ? '(filtered)':''}</label>
-  </div></div>`;
-  html += visible.map(item => `<div class="check-item">
-    <input type="checkbox" id="chk-${type}-${item.replace(/\s/g,'_')}" ${selected.includes(item)?'checked':''} onchange="toggleItem('${type}','${item}',this.checked)">
-    <label for="chk-${type}-${item.replace(/\s/g,'_')}">${item}</label>
-  </div>`).join('');
-  document.getElementById(type+'-list').innerHTML = html;
+  const ctx = modalCtx.context;
+  const isAssignment = ctx === 'assignment' || ctx === 'ea';
+
+  if(type === 'groupkey') {
+    let html = visible.map(item => `<div class="check-item">
+      <input type="radio" name="groupkey-radio" id="chk-${type}-${item}" ${selected.includes(item)?'checked':''} onchange="selectGroupKey('${item}')">
+      <label for="chk-${type}-${item}">${item}</label>
+    </div>`).join('');
+    document.getElementById(type+'-list').innerHTML = html;
+  } else {
+    // Check if the OTHER type already has 'default' selected → lock this list to default-only
+    const gs = ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : null);
+    const otherType = type === 'currency' ? 'websites' : 'currencies';
+    const otherHasDefault = gs && gs[otherType] && gs[otherType].includes('default');
+    const thisHasDefault = selected.includes('default');
+    // If either side has default, lock both to default-only
+    const locked = isAssignment && (otherHasDefault || thisHasDefault);
+
+    const allChecked = !locked && visible.length > 0 && visible.every(i => selected.includes(i));
+    let html = '';
+
+    if(isAssignment) {
+      const defaultChecked = selected.includes('default');
+      html += `<div class="check-item" style="border-bottom:1px solid var(--border);margin-bottom:6px;padding-bottom:6px">
+        <input type="checkbox" id="chk-${type}-default" ${defaultChecked?'checked':''} onchange="toggleDefaultItem('${type}',this.checked)">
+        <label for="chk-${type}-default" style="font-weight:600">default</label>
+      </div>`;
+    }
+
+    html += `<div class="check-all"><div class="check-item">
+      <input type="checkbox" id="chk-all-${type}" ${allChecked?'checked':''} ${locked?'disabled':''} onchange="toggleAll('${type}')">
+      <label for="chk-all-${type}" style="${locked?'opacity:0.4':''}">Select All ${filter ? '(filtered)':''}</label>
+    </div></div>`;
+
+    html += visible.map(item => {
+      const isDisabled = locked ? 'disabled' : '';
+      const labelStyle = locked ? 'opacity:0.4' : '';
+      return `<div class="check-item">
+        <input type="checkbox" id="chk-${type}-${item.replace(/\s/g,'_')}" ${selected.includes(item)?'checked':''} ${isDisabled} onchange="toggleItem('${type}','${item}',this.checked)">
+        <label for="chk-${type}-${item.replace(/\s/g,'_')}" style="${labelStyle}">${item}</label>
+      </div>`;
+    }).join('');
+
+    document.getElementById(type+'-list').innerHTML = html;
+  }
+}
+
+function selectGroupKey(key) {
+  modalCtx.tempSelected = [key];
 }
 
 function toggleAll(type) {
   const items = type === 'currency' ? CURRENCIES : WEBSITES;
-  const searchVal = document.querySelector('#modal-'+type+' .check-search').value.toLowerCase();
+  const searchVal = document.querySelector('#modal-'+type+' .check-search')?.value.toLowerCase() || '';
   const visible = searchVal ? items.filter(i=>i.toLowerCase().includes(searchVal)) : items;
   const allChecked = document.getElementById('chk-all-'+type).checked;
   if(allChecked) {
@@ -591,40 +804,93 @@ function toggleAll(type) {
   renderCheckList(type, modalCtx.tempSelected, searchVal);
 }
 
+function toggleDefaultItem(type, checked) {
+  const ctx = modalCtx.context;
+  const gs = ctx === 'assignment' ? state.assignment : state.ea;
+  if(!gs) return;
+
+  if(checked) {
+    // Set this type to ['default'] only
+    modalCtx.tempSelected = ['default'];
+    // Also force the other type to ['default']
+    if(type === 'currency') gs.websites = ['default'];
+    else gs.currencies = ['default'];
+    // Update the other type's trigger button
+    const otherType = type === 'currency' ? 'website' : 'currency';
+    updateTriggerBtn(otherType, ctx, ['default']);
+  } else {
+    // Uncheck default → clear this type
+    modalCtx.tempSelected = modalCtx.tempSelected.filter(i => i !== 'default');
+    // Also clear default from the other type
+    if(type === 'currency') gs.websites = gs.websites.filter(i => i !== 'default');
+    else gs.currencies = gs.currencies.filter(i => i !== 'default');
+    const otherType = type === 'currency' ? 'website' : 'currency';
+    const otherItems = type === 'currency' ? gs.websites : gs.currencies;
+    updateTriggerBtn(otherType, ctx, otherItems);
+  }
+
+  const searchVal = document.querySelector('#modal-'+type+' .check-search')?.value.toLowerCase() || '';
+  renderCheckList(type, modalCtx.tempSelected, searchVal);
+}
+
 function toggleItem(type, item, checked) {
   if(checked && !modalCtx.tempSelected.includes(item)) modalCtx.tempSelected.push(item);
   else if(!checked) modalCtx.tempSelected = modalCtx.tempSelected.filter(i=>i!==item);
-  const searchVal = document.querySelector('#modal-'+type+' .check-search').value.toLowerCase();
+  const searchVal = document.querySelector('#modal-'+type+' .check-search')?.value.toLowerCase() || '';
   renderCheckList(type, modalCtx.tempSelected, searchVal);
 }
 
 function confirmModal(type) {
   const ctx = modalCtx.context;
-  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : state.add);
-  if(type === 'currency') gs.currencies = [...modalCtx.tempSelected];
-  else gs.websites = [...modalCtx.tempSelected];
-
-  updateTriggerBtn(type, ctx, gs[type==='currency'?'currencies':'websites']);
-  if(ctx !== 'search') updateComboPreview(ctx);
+  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : (ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : state.add)));
+  
+  if(type === 'groupkey') {
+    gs.groupKey = modalCtx.tempSelected[0] || '';
+    updateTriggerBtn(type, ctx, gs.groupKey);
+  } else {
+    if(type === 'currency') gs.currencies = [...modalCtx.tempSelected];
+    else gs.websites = [...modalCtx.tempSelected];
+    updateTriggerBtn(type, ctx, gs[type==='currency'?'currencies':'websites']);
+    if(ctx !== 'search' && ctx !== 'assignment' && ctx !== 'ea') updateComboPreview(ctx);
+  }
+  
   closeModal(type);
   // Clear validation error
   const errEl = document.getElementById(`err-${type}-${ctx}`);
-  if(errEl && gs[type==='currency'?'currencies':'websites'].length > 0) {
-    errEl.classList.remove('show');
-    document.getElementById(`btn-${type}-${ctx}`).classList.remove('invalid');
+  if(errEl) {
+    const hasValue = type === 'groupkey' ? gs.groupKey : gs[type==='currency'?'currencies':'websites'].length > 0;
+    if(hasValue) {
+      errEl.classList.remove('show');
+      document.getElementById(`btn-${type}-${ctx}`).classList.remove('invalid');
+    }
   }
 }
 
 function updateTriggerBtn(type, ctx, items) {
   const el = document.getElementById(`${type}-tags-${ctx}`);
   if(!el) return;
-  if(items.length === 0) {
-    el.innerHTML = `<span class="placeholder">Select ${type === 'currency' ? 'currencies' : 'websites'}...</span>`;
+  
+  if(type === 'groupkey') {
+    if(!items) {
+      el.innerHTML = `<span class="placeholder">Select group key...</span>`;
+    } else {
+      el.innerHTML = `<span class="tag">${items}</span>`;
+    }
   } else {
-    const MAX = 3;
-    let tags = items.slice(0, MAX).map(i => `<span class="tag">${i}</span>`).join('');
-    if(items.length > MAX) tags += `<span class="tag">+${items.length - MAX}</span>`;
-    el.innerHTML = tags;
+    if(items.length === 0) {
+      el.innerHTML = `<span class="placeholder">Select ${type === 'currency' ? 'currencies' : 'websites'}...</span>`;
+    } else {
+      // Check if all items are selected
+      const allItems = type === 'currency' ? CURRENCIES : WEBSITES;
+      if(items.length === allItems.length) {
+        el.innerHTML = `<span class="tag">all</span>`;
+      } else {
+        const MAX = 3;
+        let tags = items.slice(0, MAX).map(i => `<span class="tag">${i}</span>`).join('');
+        if(items.length > MAX) tags += `<span class="tag">+${items.length - MAX}</span>`;
+        el.innerHTML = tags;
+      }
+    }
   }
 }
 
@@ -796,14 +1062,9 @@ function saveForm() {
   const gs = state.add;
   let valid = true;
 
-  if(!gs.currencies.length) {
-    document.getElementById('err-currency-add').classList.add('show');
-    document.getElementById('btn-currency-add').classList.add('invalid');
-    valid = false;
-  }
-  if(!gs.websites.length) {
-    document.getElementById('err-website-add').classList.add('show');
-    document.getElementById('btn-website-add').classList.add('invalid');
+  if(!gs.groupKey) {
+    document.getElementById('err-groupkey-add').classList.add('show');
+    document.getElementById('btn-groupkey-add').classList.add('invalid');
     valid = false;
   }
   if(!getAllSelectedTables(gs).length) {
@@ -812,58 +1073,76 @@ function saveForm() {
   }
   if(!valid) return;
 
-  // Check for duplicate currency + website combinations
-  const duplicates = [];
-  gs.currencies.forEach(cur => {
-    gs.websites.forEach(web => {
-      const existing = savedData.find(d => d.currency === cur && d.website === web);
-      if(existing) {
-        duplicates.push(`${cur} + ${web}`);
-      }
-    });
-  });
-
-  if(duplicates.length > 0) {
-    const dupList = duplicates.join(', ');
-    showToast(`Cannot save: duplicate configurations found (${dupList})`, 'error');
+  // Check duplicate group key in Promotion Content (excluding default isDefault record)
+  const groupKey = gs.groupKey;
+  const dupGroupKey = savedData.find(d => !d.isDefault && d.groupKey === groupKey);
+  if(dupGroupKey) {
+    showToast(`Group key ${groupKey} already exists.`, 'error');
     return;
   }
 
   const now = new Date();
   const editor = 'Admin';
-  const status = document.getElementById('status-add').value;
-
-  gs.currencies.forEach(cur => {
-    gs.websites.forEach(web => {
-      const tables = gs.sortOrder.map(k=>getTableLabel(k));
-      savedData.push({ id: nextId++, currency: cur, website: web, tables, sortOrder: [...gs.sortOrder], status, lastEditor: editor, lastEditedTime: now });
-    });
+  const tag = document.getElementById('recommended-name-add').value.trim();
+  
+  const currency = 'all';
+  const website = 'all';
+  const status = 'draft';
+  
+  const tables = gs.sortOrder.map(k=>getTableLabel(k));
+  const recommendedId = generateRecommendedId();
+  savedData.push({ 
+    id: nextId++, 
+    recommendedId, 
+    recommendedName: tag,
+    tag,
+    currency, 
+    website, 
+    tables, 
+    sortOrder: [...gs.sortOrder], 
+    status, 
+    groupKey, 
+    lastEditor: editor, 
+    lastEditedTime: now 
   });
 
-  // Sort by newest
   savedData.sort((a,b) => b.lastEditedTime - a.lastEditedTime);
 
   showToast('Configurations saved successfully!', 'success');
+  closeAddModal();
+  renderAllResults();
   resetForm('add');
-  switchTab('list');
 }
 
 function resetForm(ctx) {
   if(ctx === 'add') {
-    state.add = { currencies:[], websites:[], gameTables:{}, sortOrder:[] };
-    updateTriggerBtn('currency','add',[]);
-    updateTriggerBtn('website','add',[]);
-    document.getElementById('combo-preview-add').style.display = 'none';
-    document.getElementById('status-add').value = 'draft';
+    state.add = { currencies:[], websites:[], groupKey:'', gameTables:{}, sortOrder:[] };
+    updateTriggerBtn('groupkey','add','');
+    document.getElementById('recommended-name-add').value = '';
     renderGamesGrid('add');
     renderSortList('add');
-    ['currency','website','games'].forEach(f => {
+    ['groupkey','games'].forEach(f => {
       const el = document.getElementById(`err-${f}-add`);
       if(el) el.classList.remove('show');
     });
-    document.getElementById('btn-currency-add').classList.remove('invalid');
-    document.getElementById('btn-website-add').classList.remove('invalid');
+    document.getElementById('btn-groupkey-add').classList.remove('invalid');
   }
+}
+
+function renderAllResults() {
+  renderResults(null, null);
+}
+
+function doAssignmentSearch() {
+  const gs = state.search;
+  renderAssignmentTable(gs.currencies, gs.websites);
+}
+
+function resetAssignmentSearch() {
+  state.search = { currencies:[], websites:[] };
+  updateTriggerBtn('currency','search',[]);
+  updateTriggerBtn('website','search',[]);
+  renderAssignmentTable([], []);
 }
 
 // ===================== SEARCH =====================
@@ -880,41 +1159,41 @@ function resetSearch() {
   state.search = { currencies:[], websites:[] };
   updateTriggerBtn('currency','search',[]);
   updateTriggerBtn('website','search',[]);
-  document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Select currency and website to search for results.</p></div>`;
+  document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No promotion content yet. Click "+ New" to add one.</p></div>`;
 }
 
 function renderResults(currencies, websites) {
   const filtered = savedData.filter(d =>
-    (currencies.includes('__all__') || currencies.includes(d.currency)) &&
-    (websites.includes('__all__') || websites.includes(d.website))
+    (!currencies || !currencies.length || currencies.includes('__all__') || currencies.includes(d.currency) || d.currency === 'all') &&
+    (!websites || !websites.length || websites.includes('__all__') || websites.includes(d.website) || d.website === 'all')
   );
 
   if(!filtered.length) {
-    document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No results found for selected filters.</p></div>`;
+    document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No promotion content yet. Click "+ New" to add one.</p></div>`;
     return;
   }
 
   let html = `<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px">${filtered.length} result(s) found</div>
   <div style="overflow-x:auto"><table class="results-table">
     <thead><tr>
-      <th>Currency</th><th>Website</th><th>Table List</th><th>Status</th><th>Last Editor</th><th>Last Edited Time</th><th>Actions</th>
+      <th>Group Key</th><th>Tag</th><th>Table List</th><th>Last Editor</th><th>Last Edited Time</th><th>Actions</th>
     </tr></thead>
     <tbody>${filtered.map(row => {
-      const statusText = row.status === 'published' ? 'Live' : row.status === 'archived' ? 'Offline' : 'Not Live';
-      const statusClass = row.status || 'draft';
       const isLive = row.status === 'published';
+      const isDefault = row.isDefault || false;
+      const isLockedByAssignment = promotionAssignments.some(a => a.groupKey === row.groupKey && a.status === 'active');
+      const disabledAttr = isLockedByAssignment ? ' btn-disabled' : '';
+      const disabledTitle = isLockedByAssignment ? `title="In use by an active Promotion Assignment"` : '';
       return `
     <tr>
-      <td><span class="badge">${row.currency}</span></td>
-      <td style="font-size:13px">${row.website}</td>
+      <td style="font-size:13px;font-weight:500">${row.groupKey || '-'}</td>
+      <td style="font-size:13px">${row.tag || '-'}</td>
       <td><div class="table-list-cell">${row.tables.map(t=>`<span class="table-chip-sm">${t}</span>`).join('')}</div></td>
-      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
       <td class="editor-cell">${row.lastEditor}</td>
       <td class="time-cell">${formatTime(row.lastEditedTime)}</td>
       <td><div class="action-cell">
-        <button class="btn btn-outline btn-sm${isLive?' btn-disabled':''}" onclick="openEdit(${row.id})">Edit</button>
-        <button class="btn btn-sm${isLive?' btn-disabled':''}" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" onclick="openDeleteConfirm(${row.id},'${row.currency} — ${row.website}')">Delete</button>
-        ${isLive ? `<button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border-color:#fde68a" onclick="removeConfiguration(${row.id})">Set Offline</button>` : ''}
+        <button class="btn btn-outline btn-sm${disabledAttr}" ${disabledTitle} onclick="${isLockedByAssignment?`showToast('Cannot edit: in use by an active Promotion Assignment','error')`:`openEdit(${row.id})`}">Edit</button>
+        ${!isDefault ? `<button class="btn btn-sm${disabledAttr}" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" ${disabledTitle} onclick="${isLockedByAssignment?`showToast('Cannot delete: in use by an active Promotion Assignment','error')`:`openDeleteConfirm(${row.id},'${row.groupKey||'-'}')`}">Delete</button>` : ''}
       </div></td>
     </tr>`;
     }).join('')}
@@ -937,9 +1216,7 @@ function removeConfiguration(id) {
   row.lastEditedTime = new Date();
   savedData.sort((a,b)=>b.lastEditedTime-a.lastEditedTime);
   showToast('Configuration set to offline successfully!', 'success');
-  // Re-render with current search filters
-  const gs = state.search;
-  if(gs.currencies.length && gs.websites.length) renderResults(gs.currencies, gs.websites);
+  renderAllResults();
 }
 
 // ===================== DELETE =====================
@@ -947,9 +1224,15 @@ function openDeleteConfirm(id, label) {
   const row = savedData.find(d => d.id === id);
   if(!row) return;
   
+  // Check if it's the default configuration
+  if(row.isDefault) {
+    showToast('Default config cannot be deleted.', 'error');
+    return;
+  }
+  
   // Check if status is published (in use)
   if(row.status === 'published') {
-    showToast('使用中的配置無法刪除', 'error');
+    showToast('Cannot delete a live config.', 'error');
     return;
   }
   
@@ -959,13 +1242,18 @@ function openDeleteConfirm(id, label) {
 }
 
 function confirmDelete() {
+  if(deleteAssignmentTargetId !== null && promotionAssignments.find(r => r.id === deleteAssignmentTargetId)) {
+    promotionAssignments = promotionAssignments.filter(r => r.id !== deleteAssignmentTargetId);
+    deleteAssignmentTargetId = null;
+    closeModal('confirm');
+    showToast('Assignment deleted.', 'success');
+    renderAssignmentTable([], []);
+    return;
+  }
   savedData = savedData.filter(d => d.id !== deleteTargetId);
   closeModal('confirm');
   showToast('Configuration deleted.', 'success');
-  // Re-render with current search filters
-  const gs = state.search;
-  if(gs.currencies.length && gs.websites.length) renderResults(gs.currencies, gs.websites);
-  else document.getElementById('results-area').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Select currency and website to search for results.</p></div>`;
+  renderAllResults();
 }
 
 // ===================== EDIT =====================
@@ -973,13 +1261,23 @@ function openEdit(id) {
   const row = savedData.find(d=>d.id===id);
   if(!row) return;
   
+  // If old data doesn't have groupKey, set a default
+  if(!row.groupKey) {
+    row.groupKey = 'group01';
+  }
+  
   state.edit = {
     id: row.id,
     currencies: [row.currency],
     websites: [row.website],
     gameTables: {},
     sortOrder: [...row.sortOrder],
-    status: row.status || 'draft'
+    status: row.status || 'draft',
+    groupKey: row.groupKey,
+    recommendedId: row.recommendedId || '',
+    recommendedName: row.recommendedName || '',
+    tag: row.tag || '',
+    isDefault: row.isDefault || false
   };
   // Rebuild gameTables from sortOrder
   row.sortOrder.forEach(key => {
@@ -988,22 +1286,51 @@ function openEdit(id) {
     state.edit.gameTables[gameId].push(table);
   });
 
-  document.getElementById('edit-modal-label').textContent = `${row.currency} — ${row.website}`;
+  document.getElementById('edit-modal-label').textContent = `${row.groupKey || '-'}${row.tag ? ' (' + row.tag + ')' : ''}`;
   renderEditModalBody();
   document.getElementById('modal-edit').classList.add('open');
 }
 
 function renderEditModalBody() {
   const gs = state.edit;
-  let html = `<div style="margin-bottom:18px">
+  const isDefaultConfig = gs.isDefault;
+  
+  let html = `<div style="margin-bottom:18px">`;
+  
+  // Group Key first (non-default only)
+  if(!isDefaultConfig) {
+    html += `
     <div style="margin-bottom:16px">
-      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--text)">Status</label>
-      <select class="status-select" id="status-edit">
-        <option value="draft" ${gs.status==='draft'?'selected':''}>Not Live</option>
-        <option value="published" ${gs.status==='published'?'selected':''}>Live</option>
-        <option value="archived" ${gs.status==='archived'?'selected':''}>Offline</option>
-      </select>
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--text)">Group Key <span class="req">*</span></label>
+      <button class="trigger-btn" id="btn-groupkey-edit" onclick="openModal('groupkey','edit')" style="width:100%">
+        <span class="selected-tags" id="groupkey-tags-edit"></span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <span class="field-error" id="err-groupkey-edit">Please select a group key.</span>
+    </div>`;
+  }
+
+  html += `
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--text)">Tag</label>
+      <input type="text" class="status-select" id="recommended-name-edit" value="${gs.tag || ''}" maxlength="30" placeholder="Enter tag (optional)">
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Max 30 characters</div>
+    </div>`;
+
+  // Show Currency and Website for default config (readonly)
+  if(isDefaultConfig) {
+    html += `
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--text)">Currency</label>
+      <input type="text" class="status-select" value="all" disabled style="background:#f3f4f6;color:#9ca3af;cursor:not-allowed;border-color:#e5e7eb">
     </div>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--text)">Website</label>
+      <input type="text" class="status-select" value="all" disabled style="background:#f3f4f6;color:#9ca3af;cursor:not-allowed;border-color:#e5e7eb">
+    </div>`;
+  }
+
+  html += `
     <div class="section-title" style="margin-bottom:10px">Table Settings</div>
     <div class="games-grid" id="games-grid-edit"></div>
     <span class="field-error" id="err-games-edit" style="margin-top:8px">Please select at least one table.</span>
@@ -1013,9 +1340,12 @@ function renderEditModalBody() {
   <div class="sort-list" id="sort-list-edit"></div>`;
   document.getElementById('edit-modal-body').innerHTML = html;
   
-  // Render immediately - event listeners will be properly attached
   renderGamesGrid('edit');
   renderSortList('edit');
+  
+  if(!gs.isDefault) {
+    updateTriggerBtn('groupkey','edit',gs.groupKey);
+  }
 }
 
 function saveEdit() {
@@ -1024,18 +1354,332 @@ function saveEdit() {
     document.getElementById('err-games-edit').classList.add('show');
     return;
   }
+  if(!gs.isDefault && !gs.groupKey) {
+    document.getElementById('err-groupkey-edit').classList.add('show');
+    document.getElementById('btn-groupkey-edit').classList.add('invalid');
+    return;
+  }
   const row = savedData.find(d=>d.id===gs.id);
   if(!row) return;
+  
   row.tables = gs.sortOrder.map(k=>getTableLabel(k));
   row.sortOrder = [...gs.sortOrder];
-  row.status = document.getElementById('status-edit').value;
+  if(!gs.isDefault) row.groupKey = gs.groupKey;
+  const editedTag = document.getElementById('recommended-name-edit').value.trim();
+  row.tag = editedTag;
+  row.recommendedName = editedTag; // keep backward compat
   row.lastEditor = 'Admin';
   row.lastEditedTime = new Date();
   savedData.sort((a,b)=>b.lastEditedTime-a.lastEditedTime);
   closeModal('edit');
   showToast('Configuration updated successfully!', 'success');
-  const s = state.search;
-  if(s.currencies.length && s.websites.length) renderResults(s.currencies, s.websites);
+  renderAllResults();
+}
+
+// ===================== ADD CONTENT MODAL =====================
+function openAddModal() {
+  resetForm('add');
+  document.getElementById('modal-add-content').classList.add('open');
+}
+function closeAddModal() {
+  document.getElementById('modal-add-content').classList.remove('open');
+}
+
+// ===================== ASSIGNMENT MODAL =====================
+function openAssignmentModal() {
+  state.assignment = { currencies: [], websites: [] };
+  updateTriggerBtn('currency', 'assignment', []);
+  updateTriggerBtn('website', 'assignment', []);
+  document.getElementById('groupkey-assignment').value = '';
+  document.getElementById('status-assignment').value = 'inactive';
+  // Clear errors
+  ['currency','website','groupkey'].forEach(f => {
+    const el = document.getElementById(`err-${f}-assignment`);
+    if(el) el.classList.remove('show');
+    const btn = document.getElementById(`btn-${f}-assignment`);
+    if(btn) btn.classList.remove('invalid');
+  });
+  document.getElementById('modal-assignment').classList.add('open');
+}
+
+function closeAssignmentModal() {
+  document.getElementById('modal-assignment').classList.remove('open');
+}
+
+// Shared conflict check for both New and Edit
+// Returns true if conflict exists.
+// Rules:
+//   - If currency=default OR website=default: any active record with same groupKey → conflict
+//   - Otherwise: exact currency+website+groupKey match with active → conflict
+//              OR a default-row with same groupKey is active → conflict
+// skipId: exclude this record id from check (for edit, pass row.id; for new, pass null)
+function checkAssignmentConflict(skipId, currency, website, groupKey) {
+  const isDefault = currency === 'default' || website === 'default';
+  if(isDefault) {
+    // Any active record (including other defaults) with same groupKey, excluding self
+    return promotionAssignments.some(a =>
+      a.id !== skipId && a.groupKey === groupKey && a.status === 'active'
+    );
+  } else {
+    // Exact match active
+    const exactMatch = promotionAssignments.some(a =>
+      a.id !== skipId &&
+      a.currency === currency && a.website === website &&
+      a.groupKey === groupKey && a.status === 'active'
+    );
+    // Any default-row with same groupKey is active
+    const defaultActive = promotionAssignments.some(a =>
+      a.id !== skipId && a.isDefault &&
+      a.groupKey === groupKey && a.status === 'active'
+    );
+    return exactMatch || defaultActive;
+  }
+}
+
+function saveAssignment() {
+  const gs = state.assignment;
+  let valid = true;
+
+  if(!gs.currencies.length) {
+    document.getElementById('err-currency-assignment').classList.add('show');
+    document.getElementById('btn-currency-assignment').classList.add('invalid');
+    valid = false;
+  }
+  if(!gs.websites.length) {
+    document.getElementById('err-website-assignment').classList.add('show');
+    document.getElementById('btn-website-assignment').classList.add('invalid');
+    valid = false;
+  }
+  const groupKey = document.getElementById('groupkey-assignment').value;
+  if(!groupKey) {
+    document.getElementById('err-groupkey-assignment').classList.add('show');
+    document.getElementById('groupkey-assignment').style.borderColor = 'var(--danger)';
+    valid = false;
+  } else {
+    document.getElementById('groupkey-assignment').style.borderColor = '';
+  }
+  if(!valid) return;
+
+  const status = document.getElementById('status-assignment').value;
+  const now = new Date();
+
+  // Only check conflict when new record is active
+  if(status === 'active') {
+    const conflicts = [];
+    gs.currencies.forEach(cur => {
+      gs.websites.forEach(web => {
+        const conflict = checkAssignmentConflict(null, cur, web, groupKey);
+        if(conflict) conflicts.push(`${cur} / ${web} / ${groupKey}`);
+      });
+    });
+    if(conflicts.length) {
+      showToast(`Active record already exists: ${conflicts[0]}`, 'error');
+      return;
+    }
+  }
+
+  gs.currencies.forEach(cur => {
+    gs.websites.forEach(web => {
+      const isDefaultRecord = cur === 'default' || web === 'default';
+      promotionAssignments.push({
+        id: Date.now() + Math.random(),
+        promotionId: generatePromotionId(),
+        currency: cur,
+        website: web,
+        groupKey,
+        status,
+        ...(isDefaultRecord ? { isDefault: true } : {}),
+        lastEditor: 'Admin',
+        lastEditedTime: now
+      });
+    });
+  });
+
+  closeAssignmentModal();
+  showToast('Promotion assignment created successfully!', 'success');
+  renderAssignmentTable([], []);
+}
+
+let editAssignmentTargetId = null;
+
+function openEditAssignmentModal(id) {
+  const row = promotionAssignments.find(r => r.id === id);
+  if(!row) return;
+  editAssignmentTargetId = id;
+
+  // Populate ea state
+  state.ea = {
+    currencies: [row.currency],
+    websites: [row.website]
+  };
+  updateTriggerBtn('currency', 'ea', state.ea.currencies);
+  updateTriggerBtn('website', 'ea', state.ea.websites);
+
+  // Clear validation errors
+  ['currency','website'].forEach(f => {
+    const el = document.getElementById(`err-${f}-ea`);
+    if(el) el.classList.remove('show');
+    const btn = document.getElementById(`btn-${f}-ea`);
+    if(btn) btn.classList.remove('invalid');
+  });
+
+  document.getElementById('ea-groupkey').value = row.groupKey;
+  document.getElementById('ea-status').value = row.status;
+  document.getElementById('modal-edit-assignment').classList.add('open');
+}
+
+function closeEditAssignmentModal() {
+  document.getElementById('modal-edit-assignment').classList.remove('open');
+}
+
+function saveEditAssignment() {
+  const row = promotionAssignments.find(r => r.id === editAssignmentTargetId);
+  if(!row) return;
+  const newGroupKey = document.getElementById('ea-groupkey').value;
+  const newStatus = document.getElementById('ea-status').value;
+  const newCurrencies = state.ea.currencies;
+  const newWebsites = state.ea.websites;
+
+  // Validate
+  let valid = true;
+  if(!newCurrencies.length) {
+    document.getElementById('err-currency-ea').classList.add('show');
+    document.getElementById('btn-currency-ea').classList.add('invalid');
+    valid = false;
+  }
+  if(!newWebsites.length) {
+    document.getElementById('err-website-ea').classList.add('show');
+    document.getElementById('btn-website-ea').classList.add('invalid');
+    valid = false;
+  }
+  if(!valid) return;
+
+  // Only check conflict when saving as active
+  if(newStatus === 'active') {
+    const conflicts = [];
+    newCurrencies.forEach(cur => {
+      newWebsites.forEach(web => {
+        const conflict = checkAssignmentConflict(row.id, cur, web, newGroupKey);
+        if(conflict) conflicts.push(`${cur} / ${web} / ${newGroupKey}`);
+      });
+    });
+    if(conflicts.length) {
+      showToast(`Active record already exists: ${conflicts[0]}`, 'error');
+      return;
+    }
+  }
+
+  // If multiple currency×website combos, create new rows for extras and update current
+  const now = new Date();
+  let first = true;
+  newCurrencies.forEach(cur => {
+    newWebsites.forEach(web => {
+      if(first) {
+        row.currency = cur;
+        row.website = web;
+        row.groupKey = newGroupKey;
+        row.status = newStatus;
+        row.isDefault = (cur === 'default' || web === 'default') || undefined;
+        row.lastEditor = 'Admin';
+        row.lastEditedTime = now;
+        first = false;
+      } else {
+        const isDefaultRecord = cur === 'default' || web === 'default';
+        promotionAssignments.push({
+          id: Date.now() + Math.random(),
+          promotionId: generatePromotionId(),
+          currency: cur,
+          website: web,
+          groupKey: newGroupKey,
+          status: newStatus,
+          ...(isDefaultRecord ? { isDefault: true } : {}),
+          lastEditor: 'Admin',
+          lastEditedTime: now
+        });
+      }
+    });
+  });
+
+  closeEditAssignmentModal();
+  showToast('Assignment updated successfully!', 'success');
+  renderAssignmentTable([], []);
+}
+
+function setAssignmentOffline(id) {
+  const row = promotionAssignments.find(r => r.id === id);
+  if(!row) return;
+  row.status = 'offline';
+  row.lastEditor = 'Admin';
+  row.lastEditedTime = new Date();
+  showToast('Assignment set to offline.', 'success');
+  renderAssignmentTable([], []);
+}
+
+let deleteAssignmentTargetId = null;
+function confirmDeleteAssignment(id) {
+  deleteAssignmentTargetId = id;
+  const row = promotionAssignments.find(r => r.id === id);
+  document.getElementById('confirm-delete-label').textContent = `${row.currency} + ${row.website} + ${row.groupKey}`;
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function getTagByGroupKey(groupKey) {
+  const match = savedData.find(d => !d.isDefault && d.groupKey === groupKey);
+  return (match && match.tag) ? match.tag : '-';
+}
+
+function renderAssignmentTable(currencies, websites) {
+  const area = document.getElementById('assignment-results-area');
+  if(!area) return;
+
+  // Multiple defaults: sort by newest first
+  const defaultRows = promotionAssignments.filter(r => r.isDefault)
+    .sort((a, b) => b.lastEditedTime - a.lastEditedTime);
+  let nonDefault = promotionAssignments.filter(r => !r.isDefault);
+  if(currencies && currencies.length) nonDefault = nonDefault.filter(r => currencies.includes(r.currency));
+  if(websites && websites.length) nonDefault = nonDefault.filter(r => websites.includes(r.website));
+
+  const data = [...defaultRows, ...nonDefault];
+
+  if(!data.length) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No promotion assignments yet. Click "+ New" to add one.</p></div>`;
+    return;
+  }
+
+  const statusLabel = { active: 'Active', inactive: 'Inactive', offline: 'Offline' };
+  const statusStyle = {
+    active: 'background:#d1fae5;color:#065f46',
+    inactive: 'background:#f3f4f6;color:#6b7280',
+    offline: 'background:#fee2e2;color:#991b1b'
+  };
+
+  let html = `<div style="overflow-x:auto"><table class="results-table">
+    <thead><tr>
+      <th>Currency</th><th>Website</th><th>Group Key</th><th>Tag</th><th>Status</th><th>Last Editor</th><th>Last Edited Time</th><th>Actions</th>
+    </tr></thead>
+    <tbody>${data.map(row => {
+      const isActive = row.status === 'active';
+      const isDefault = !!row.isDefault;
+      const dis = isActive ? ' btn-disabled' : '';
+      const disTitle = isActive ? `title="Cannot edit while Active"` : '';
+      const editBtn = `<button class="btn btn-outline btn-sm${dis}" ${disTitle} onclick="${isActive ? `showToast('Cannot edit while Active','error')` : `openEditAssignmentModal(${row.id})`}">Edit</button>`;
+      const offlineBtn = isActive ? `<button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border-color:#fde68a" onclick="setAssignmentOffline(${row.id})">Set Offline</button>` : '';
+      const deleteBtn = `<button class="btn btn-sm${dis}" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" ${disTitle} onclick="${isActive ? `showToast('Cannot delete while Active','error')` : `confirmDeleteAssignment(${row.id})`}">Delete</button>`;
+      const tag = getTagByGroupKey(row.groupKey);
+      return `<tr${isDefault ? ' style="background:#f0fdf4"' : ''}>
+        <td><span class="badge">${row.currency}</span></td>
+        <td style="font-size:13px">${row.website}</td>
+        <td style="font-size:13px">${row.groupKey}</td>
+        <td style="font-size:13px;color:var(--text-muted)">${tag}</td>
+        <td><span class="status-badge" style="${statusStyle[row.status]||''};border-radius:4px;padding:3px 9px;font-size:12px;font-weight:500;display:inline-flex;align-items:center">${statusLabel[row.status]||row.status}</span></td>
+        <td class="editor-cell">${row.lastEditor}</td>
+        <td class="time-cell">${formatTime(row.lastEditedTime)}</td>
+        <td><div class="action-cell">${editBtn}${offlineBtn}${deleteBtn}</div></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table></div>`;
+  area.innerHTML = html;
 }
 
 // ===================== TOAST =====================
@@ -1064,23 +1708,13 @@ document.addEventListener('drop', function(e) {
 
 // renderGamesGrid('add'); // Will be called when switching to add tab
 
-// Pre-populate some demo data
-(function seedDemo(){
-  const gs = { currencies:['SGD'], websites:['A01 website','A02 website'], gameTables:{
-    baccarat:['9','11'], extrasicbo:['131','C132'], roulette:['371']
-  }, sortOrder:['extrasicbo::C132','baccarat::9','roulette::371','baccarat::11','extrasicbo::131'] };
-  ['SGD'].forEach(cur => ['A01 website','A02 website'].forEach(web => {
-    savedData.push({ id:nextId++, currency:cur, website:web,
-      tables: gs.sortOrder.map(k=>{ const[g,t]=k.split('::'); return GAMES.find(x=>x.id===g).name.split(' ')[0]+' '+t; }),
-      sortOrder:[...gs.sortOrder], lastEditor:'System', lastEditedTime: new Date(Date.now()-3600000) });
-  }));
-  const gs2 = { sortOrder:['baccarat::1','baccarat::2','dragontiger::31'] };
-  ['MYR'].forEach(cur => ['A01 website'].forEach(web => {
-    savedData.push({ id:nextId++, currency:cur, website:web,
-      tables:['Baccarat 1','Baccarat 2','Dragon 31'], sortOrder:['baccarat::1','baccarat::2','dragontiger::31'],
-      lastEditor:'Admin', lastEditedTime: new Date(Date.now()-7200000) });
-  }));
-  savedData.sort((a,b)=>b.lastEditedTime-a.lastEditedTime);
+// Initialize
+(function init(){
+  state.search = { currencies: [], websites: [] };
+  updateTriggerBtn('currency', 'search', []);
+  updateTriggerBtn('website', 'search', []);
+  renderAllResults();
+  renderAssignmentTable([], []);
 })();
 </script>
 </body>
