@@ -271,6 +271,27 @@
 
   .drag-hint { font-size: 11.5px; color: var(--text-light); display: flex; align-items: center; gap: 5px; }
 
+  /* Group Key Usage Table */
+  .gku-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .gku-table th { background: var(--surface); padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 2px solid var(--border); white-space: nowrap; }
+  .gku-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .gku-table tr:last-child td { border-bottom: none; }
+  .gku-table tr:hover td { background: #fafbfc; }
+  .gku-cell-key { font-family: 'DM Mono', monospace; font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .gku-currency-list { display: flex; flex-wrap: wrap; gap: 4px; }
+  .gku-currency-badge { display: inline-block; background: var(--primary-light); color: var(--primary); border-radius: 4px; padding: 2px 7px; font-size: 11.5px; font-weight: 600; font-family: 'DM Mono', monospace; }
+  .gku-website-col { display: flex; flex-direction: column; gap: 3px; min-width: 160px; }
+  .gku-website-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .gku-website-name { font-size: 13px; color: var(--text); }
+  .gku-website-count { font-size: 11.5px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1px 7px; white-space: nowrap; }
+  .gku-status-col { display: flex; flex-direction: column; gap: 3px; }
+  .gku-status-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+  .gku-status-active   { background: #d1fae5; color: #065f46; }
+  .gku-status-inactive { background: #f3f4f6; color: #6b7280; }
+  .gku-status-offline  { background: #fee2e2; color: #991b1b; }
+  .gku-action-col { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .gku-editor-col { font-size: 12.5px; font-weight: 500; white-space: nowrap; }
+
   /* Badge */
   .badge { display: inline-block; background: var(--primary-light); color: var(--primary); border-radius: 20px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
 
@@ -290,6 +311,7 @@
     <div class="tabs">
       <div class="tab active" id="tab-list" onclick="switchTab('list')">Promotion Assignment</div>
       <div class="tab" id="tab-add" onclick="switchTab('add')">Promotion Content</div>
+      <div class="tab" id="tab-groupkey" onclick="switchTab('groupkey')">Group Key Usage</div>
     </div>
 
     <!-- ADD TAB -->
@@ -335,6 +357,13 @@
         </div>
       </div>
     </div>
+
+    <!-- GROUP KEY USAGE TAB -->
+    <div class="tab-content" id="content-groupkey">
+      <div class="section-title" style="margin-bottom:18px">Group Key Usage Overview</div>
+      <div id="groupkey-usage-area"></div>
+    </div>
+
   </div>
 </div>
 
@@ -616,6 +645,108 @@
   </div>
 </div>
 
+<!-- Group Key Usage Edit Modal -->
+<div class="modal-overlay" id="modal-gku-edit" style="z-index:1050">
+  <div class="modal" style="width:560px;max-height:90vh">
+    <div class="modal-header">
+      <span class="modal-title">Edit — <span id="gku-edit-title"></span></span>
+      <button class="modal-close" onclick="closeGkuEditModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px">
+      <!-- group key tag -->
+      <div class="form-group">
+        <label>Group Key Tag</label>
+        <input type="text" class="status-select" id="gku-edit-tag" maxlength="30" placeholder="最多共可輸入30個字">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">最多共可輸入30個字</div>
+      </div>
+      <!-- status -->
+      <div class="form-group">
+        <label>Status</label>
+        <select class="status-select" id="gku-edit-status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="offline">Offline</option>
+        </select>
+      </div>
+      <!-- currency -->
+      <div class="form-group">
+        <label>Currency</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" class="status-select" id="gku-edit-currency-display" placeholder="Select Some Options" readonly style="flex:1;cursor:pointer" onclick="openGkuModal('currency')">
+          <button class="btn btn-primary btn-sm" onclick="openGkuModal('currency')">Select</button>
+        </div>
+      </div>
+      <!-- website -->
+      <div class="form-group">
+        <label>Website</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" class="status-select" id="gku-edit-website-display" placeholder="Website" readonly style="flex:1;cursor:pointer;min-width:140px" onclick="openGkuModal('website')">
+          <button class="btn btn-primary btn-sm" onclick="openGkuModal('website')">Select</button>
+        </div>
+      </div>
+      <!-- group key select -->
+      <div class="form-group">
+        <label>Group Key</label>
+        <select class="status-select" id="gku-edit-groupkey">
+          <option value="group02">group02</option>
+          <option value="group03">group03</option>
+          <option value="group04">group04</option>
+          <option value="group05">group05</option>
+          <option value="group06">group06</option>
+          <option value="group07">group07</option>
+          <option value="group08">group08</option>
+          <option value="group09">group09</option>
+          <option value="group10">group10</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeGkuEditModal()">Back</button>
+      <button class="btn btn-primary btn-sm" onclick="saveGkuEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GKU sub-modals for currency/website selection -->
+<div class="modal-overlay" id="modal-gku-currency" style="z-index:1200">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Select Currency</span>
+      <button class="modal-close" onclick="closeGkuModal('currency')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="check-search" type="text" placeholder="Search currency..." oninput="filterGkuModal('currency',this.value)">
+      <div class="check-list" id="gku-currency-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeGkuModal('currency')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmGkuModal('currency')">Confirm</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-gku-website" style="z-index:1200">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Select Website</span>
+      <button class="modal-close" onclick="closeGkuModal('website')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="check-search" type="text" placeholder="Search website..." oninput="filterGkuModal('website',this.value)">
+      <div class="check-list" id="gku-website-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeGkuModal('website')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmGkuModal('website')">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container"></div>
 
 <script>
@@ -690,6 +821,7 @@ function switchTab(tab) {
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('content-'+tab).classList.add('active');
   if(tab === 'add') renderGamesGrid('add');
+  if(tab === 'groupkey') renderGroupKeyUsage();
 }
 
 // ===================== RENDER GAMES GRID =====================
@@ -1242,6 +1374,17 @@ function openDeleteConfirm(id, label) {
 }
 
 function confirmDelete() {
+  // Group key delete mode
+  if(window._deleteGroupKeyMode && deleteGroupKeyTarget) {
+    promotionAssignments = promotionAssignments.filter(r => r.groupKey !== deleteGroupKeyTarget);
+    const gk = deleteGroupKeyTarget;
+    deleteGroupKeyTarget = null;
+    window._deleteGroupKeyMode = false;
+    closeModal('confirm');
+    showToast(`All records for ${gk} deleted.`, 'success');
+    renderGroupKeyUsage();
+    return;
+  }
   if(deleteAssignmentTargetId !== null && promotionAssignments.find(r => r.id === deleteAssignmentTargetId)) {
     promotionAssignments = promotionAssignments.filter(r => r.id !== deleteAssignmentTargetId);
     deleteAssignmentTargetId = null;
@@ -1680,6 +1823,282 @@ function renderAssignmentTable(currencies, websites) {
     </tbody>
   </table></div>`;
   area.innerHTML = html;
+}
+
+// ===================== GROUP KEY USAGE =====================
+function renderGroupKeyUsage() {
+  const area = document.getElementById('groupkey-usage-area');
+  if(!area) return;
+
+  // Group assignments by groupKey
+  const map = {};
+  promotionAssignments.forEach(row => {
+    const key = row.groupKey;
+    if(!map[key]) map[key] = [];
+    map[key].push(row);
+  });
+
+  // Also include groupkeys that exist in savedData but have no assignments
+  GROUPKEYS.forEach(gk => { if(!map[gk]) map[gk] = []; });
+
+  const sortedKeys = Object.keys(map).sort();
+
+  if(!sortedKeys.length) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">🔑</div><p>No group key usage data available.</p></div>`;
+    return;
+  }
+
+  // Build table rows — one row per groupKey
+  const rows = sortedKeys.map(gk => {
+    const records = map[gk];
+
+    // Unique currencies used by this groupKey
+    const currencies = [...new Set(records.map(r => r.currency))];
+
+    // Websites with usage count
+    const webCountMap = {};
+    records.forEach(r => {
+      if(!webCountMap[r.website]) webCountMap[r.website] = 0;
+      webCountMap[r.website]++;
+    });
+    const websites = Object.entries(webCountMap).sort((a,b) => b[1]-a[1]);
+
+    // Status summary per record
+    const statuses = [...new Set(records.map(r => r.status))];
+
+    // Last editor
+    const lastEditorRecord = [...records].sort((a,b) => (b.lastEditedTime||0) - (a.lastEditedTime||0))[0];
+    const lastEditor = lastEditorRecord ? lastEditorRecord.lastEditor : '—';
+
+    // Tag from savedData
+    const tagInfo = savedData.find(d => d.groupKey === gk && !d.isDefault);
+    const tag = tagInfo ? tagInfo.tag : '—';
+
+    // Total usage count
+    const totalCount = records.length;
+
+    // Currency badges
+    const currencyHTML = currencies.length
+      ? currencies.map(c => `<span class="gku-currency-badge">${c}</span>`).join('')
+      : `<span style="color:var(--text-light);font-size:12px">—</span>`;
+
+    // Website rows
+    const websiteHTML = websites.length
+      ? websites.map(([web, cnt]) => `
+          <div class="gku-website-row">
+            <span class="gku-website-name">${web}</span>
+          </div>`).join('')
+      : `<span style="color:var(--text-light);font-size:12px">—</span>`;
+
+    // Status badges
+    const statusHTML = statuses.length
+      ? statuses.map(s => {
+          const cls = `gku-status-${s}`;
+          const label = {active:'Active',inactive:'Inactive',offline:'Offline'}[s] || s;
+          return `<span class="gku-status-badge ${cls}">${label}</span>`;
+        }).join('')
+      : `<span style="color:var(--text-light);font-size:12px">—</span>`;
+
+    // Action buttons (Edit/Group Off/Delete) — mirroring the reference image
+    const isAnyActive = records.some(r => r.status === 'active');
+    const editBtn = `<button class="btn btn-outline btn-sm" onclick="openGkuEditModal('${gk}')">Edit</button>`;
+    const groupOffBtn = isAnyActive
+      ? `<button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border-color:#fde68a" onclick="groupOffByKey('${gk}')">Group Off</button>`
+      : `<button class="btn btn-sm btn-disabled" style="background:#fef3c7;color:#92400e;border-color:#fde68a;opacity:0.4" disabled>Group Off</button>`;
+    const deleteBtn = isAnyActive
+      ? `<button class="btn btn-sm btn-disabled" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5;opacity:0.4" disabled title="Cannot delete while Active">Delete</button>`
+      : `<button class="btn btn-sm" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" onclick="confirmDeleteGroupKey('${gk}')">Delete</button>`;
+
+    return `<tr>
+      <td>
+        <div class="gku-cell-key">${gk}</div>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">${tag !== '—' ? tag : ''}</div>
+      </td>
+      <td><div class="gku-currency-list">${currencyHTML}</div></td>
+      <td><div class="gku-website-col">${websiteHTML}</div></td>
+      <td><div class="gku-status-col">${statusHTML}</div></td>
+      <td><div class="gku-action-col">${editBtn}${groupOffBtn}${deleteBtn}</div></td>
+      <td class="gku-editor-col">${lastEditor}</td>
+    </tr>`;
+  });
+
+  area.innerHTML = `<div style="overflow-x:auto"><table class="gku-table">
+    <thead><tr>
+      <th>Group Key</th>
+      <th>Currency</th>
+      <th>Website</th>
+      <th>Status</th>
+      <th>Actions</th>
+      <th>User Editor</th>
+    </tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table></div>`;
+}
+
+function groupOffByKey(gk) {
+  const now = new Date();
+  promotionAssignments.forEach(r => {
+    if(r.groupKey === gk && r.status === 'active') {
+      r.status = 'offline';
+      r.lastEditor = 'Admin';
+      r.lastEditedTime = now;
+    }
+  });
+  showToast(`All active records for ${gk} set to Offline.`, 'success');
+  renderGroupKeyUsage();
+}
+
+let deleteGroupKeyTarget = null;
+function confirmDeleteGroupKey(gk) {
+  deleteGroupKeyTarget = gk;
+  const count = promotionAssignments.filter(r => r.groupKey === gk).length;
+  document.getElementById('confirm-delete-label').textContent = `all ${count} record(s) for ${gk}`;
+  document.getElementById('modal-confirm').classList.add('open');
+  // Override confirm action for this context
+  window._deleteGroupKeyMode = true;
+}
+
+// ===================== GKU EDIT MODAL =====================
+let gkuEditState = { gk: null, tag: '', status: 'inactive', currencies: [], websites: [], tempCurrencies: [], tempWebsites: [] };
+
+function openGkuEditModal(gk) {
+  const records = promotionAssignments.filter(r => r.groupKey === gk);
+  const tagInfo = savedData.find(d => d.groupKey === gk && !d.isDefault);
+  const tag = tagInfo ? tagInfo.tag : '';
+
+  // Aggregate currencies and websites used by this group key
+  const currencies = [...new Set(records.map(r => r.currency).filter(c => c !== 'default'))];
+  const websites = [...new Set(records.map(r => r.website).filter(w => w !== 'default'))];
+
+  // Dominant status (active > inactive > offline)
+  const statuses = records.map(r => r.status);
+  const status = statuses.includes('active') ? 'active' : statuses.includes('inactive') ? 'inactive' : statuses[0] || 'inactive';
+
+  gkuEditState = { gk, tag, status, currencies: [...currencies], websites: [...websites], tempCurrencies: [...currencies], tempWebsites: [...websites] };
+
+  document.getElementById('gku-edit-title').textContent = gk;
+  document.getElementById('gku-edit-tag').value = tag;
+  document.getElementById('gku-edit-status').value = status;
+  document.getElementById('gku-edit-groupkey').value = gk;
+  updateGkuDisplayInputs();
+  document.getElementById('modal-gku-edit').classList.add('open');
+}
+
+function closeGkuEditModal() {
+  document.getElementById('modal-gku-edit').classList.remove('open');
+}
+
+function updateGkuDisplayInputs() {
+  const cur = gkuEditState.currencies;
+  const web = gkuEditState.websites;
+  document.getElementById('gku-edit-currency-display').value = cur.length ? cur.join(', ') : '';
+  document.getElementById('gku-edit-website-display').value = web.length ? web.join(', ') : '';
+}
+
+function renderGkuKeysList() {
+  const list = document.getElementById('gku-edit-keys-list');
+  const records = promotionAssignments.filter(r => r.groupKey === gkuEditState.gk);
+  if(!records.length) { list.innerHTML = `<div style="color:var(--text-light);font-size:13px">No records.</div>`; return; }
+  list.innerHTML = records.map(r => `
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg)">
+      <span style="flex:1;font-size:13px;font-family:'DM Mono',monospace">${r.groupKey}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${r.currency} / ${r.website}</span>
+      <button onclick="removeGkuRecord(${r.id})" style="background:#ef4444;color:white;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">−</button>
+    </div>`).join('');
+}
+
+function removeGkuRecord(id) {
+  promotionAssignments = promotionAssignments.filter(r => r.id !== id);
+  renderGkuKeysList();
+  // Update currencies/websites from remaining records
+  const remaining = promotionAssignments.filter(r => r.groupKey === gkuEditState.gk);
+  gkuEditState.currencies = [...new Set(remaining.map(r => r.currency).filter(c => c !== 'default'))];
+  gkuEditState.websites = [...new Set(remaining.map(r => r.website).filter(w => w !== 'default'))];
+  updateGkuDisplayInputs();
+}
+
+// Sub-modal for currency/website
+let gkuModalType = null;
+let gkuModalTemp = [];
+
+function openGkuModal(type) {
+  gkuModalType = type;
+  gkuModalTemp = type === 'currency' ? [...gkuEditState.currencies] : [...gkuEditState.websites];
+  renderGkuCheckList(type, gkuModalTemp, '');
+  document.getElementById('modal-gku-'+type).classList.add('open');
+}
+
+function closeGkuModal(type) {
+  document.getElementById('modal-gku-'+type).classList.remove('open');
+}
+
+function filterGkuModal(type, val) {
+  renderGkuCheckList(type, gkuModalTemp, val.toLowerCase());
+}
+
+function renderGkuCheckList(type, selected, filter) {
+  const items = type === 'currency' ? CURRENCIES : WEBSITES;
+  const visible = filter ? items.filter(i => i.toLowerCase().includes(filter)) : items;
+  const allChecked = visible.length > 0 && visible.every(i => selected.includes(i));
+  let html = `<div class="check-all"><div class="check-item">
+    <input type="checkbox" id="gku-chk-all-${type}" ${allChecked?'checked':''} onchange="gkuToggleAll('${type}')">
+    <label for="gku-chk-all-${type}">Select All</label>
+  </div></div>`;
+  html += visible.map(item => `<div class="check-item">
+    <input type="checkbox" id="gku-chk-${type}-${item.replace(/\s/g,'_')}" ${selected.includes(item)?'checked':''} onchange="gkuToggleItem('${type}','${item}',this.checked)">
+    <label for="gku-chk-${type}-${item.replace(/\s/g,'_')}">${item}</label>
+  </div>`).join('');
+  document.getElementById('gku-'+type+'-list').innerHTML = html;
+}
+
+function gkuToggleAll(type) {
+  const items = type === 'currency' ? CURRENCIES : WEBSITES;
+  const searchVal = document.querySelector('#modal-gku-'+type+' .check-search')?.value.toLowerCase() || '';
+  const visible = searchVal ? items.filter(i=>i.toLowerCase().includes(searchVal)) : items;
+  const allChecked = document.getElementById('gku-chk-all-'+type).checked;
+  if(allChecked) visible.forEach(i => { if(!gkuModalTemp.includes(i)) gkuModalTemp.push(i); });
+  else gkuModalTemp = gkuModalTemp.filter(i => !visible.includes(i));
+  renderGkuCheckList(type, gkuModalTemp, searchVal);
+}
+
+function gkuToggleItem(type, item, checked) {
+  if(checked && !gkuModalTemp.includes(item)) gkuModalTemp.push(item);
+  else if(!checked) gkuModalTemp = gkuModalTemp.filter(i => i !== item);
+  const searchVal = document.querySelector('#modal-gku-'+type+' .check-search')?.value.toLowerCase() || '';
+  renderGkuCheckList(type, gkuModalTemp, searchVal);
+}
+
+function confirmGkuModal(type) {
+  if(type === 'currency') gkuEditState.currencies = [...gkuModalTemp];
+  else gkuEditState.websites = [...gkuModalTemp];
+  updateGkuDisplayInputs();
+  closeGkuModal(type);
+}
+
+function saveGkuEdit() {
+  const gk = gkuEditState.gk;
+  const newGk = document.getElementById('gku-edit-groupkey').value;
+  const newTag = document.getElementById('gku-edit-tag').value.trim();
+  const newStatus = document.getElementById('gku-edit-status').value;
+
+  // Update tag in savedData
+  const sd = savedData.find(d => d.groupKey === gk && !d.isDefault);
+  if(sd) { sd.tag = newTag; sd.groupKey = newGk; sd.lastEditor = 'Admin'; sd.lastEditedTime = new Date(); }
+
+  // Update groupKey and status on all records
+  const now = new Date();
+  promotionAssignments.forEach(r => {
+    if(r.groupKey === gk) {
+      r.groupKey = newGk;
+      r.status = newStatus;
+      r.lastEditor = 'Admin';
+      r.lastEditedTime = now;
+    }
+  });
+
+  closeGkuEditModal();
+  showToast(`${gk} updated successfully.`, 'success');
+  renderGroupKeyUsage();
 }
 
 // ===================== TOAST =====================
