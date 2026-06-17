@@ -292,6 +292,17 @@
   .gku-action-col { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
   .gku-editor-col { font-size: 12.5px; font-weight: 500; white-space: nowrap; }
 
+  /* Tab 4 inline edit */
+  .gk2-cell { display: flex; align-items: flex-start; gap: 6px; }
+  .gk2-cell-content { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .gk2-edit-btn { flex-shrink: 0; padding: 3px 10px; font-size: 11.5px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); cursor: pointer; color: var(--text-muted); transition: all 0.12s; white-space: nowrap; font-family: inherit; }
+  .gk2-edit-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .gk2-inline-input { padding: 5px 8px; border: 1px solid var(--primary); border-radius: var(--radius); font-family: inherit; font-size: 13px; outline: none; width: 100%; box-shadow: 0 0 0 3px rgba(30,141,184,0.08); }
+  .gk2-inline-select { padding: 5px 8px; border: 1px solid var(--primary); border-radius: var(--radius); font-family: inherit; font-size: 13px; outline: none; width: 100%; background: var(--bg); cursor: pointer; box-shadow: 0 0 0 3px rgba(30,141,184,0.08); }
+  .gk2-save-btn { padding: 3px 10px; font-size: 11.5px; font-weight: 500; border: 1px solid var(--primary); border-radius: var(--radius); background: var(--primary); cursor: pointer; color: white; font-family: inherit; transition: all 0.12s; }
+  .gk2-save-btn:hover { background: var(--primary-hover); }
+  .gk2-tag-hint { font-size: 11px; color: var(--text-light); }
+
   /* Badge */
   .badge { display: inline-block; background: var(--primary-light); color: var(--primary); border-radius: 20px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
 
@@ -309,9 +320,8 @@
 
   <div class="card">
     <div class="tabs">
-      <div class="tab active" id="tab-list" onclick="switchTab('list')">Promotion Assignment</div>
+      <div class="tab active" id="tab-gk-summary" onclick="switchTab('gk-summary')">Promotion Assignment</div>
       <div class="tab" id="tab-add" onclick="switchTab('add')">Promotion Content</div>
-      <div class="tab" id="tab-groupkey" onclick="switchTab('groupkey')">Group Key Usage</div>
     </div>
 
     <!-- ADD TAB -->
@@ -327,41 +337,44 @@
       </div>
     </div>
 
-    <!-- LIST TAB -->
-    <div class="tab-content active" id="content-list">
+    <!-- GROUP KEY SUMMARY TAB (Promotion Assignment) -->
+    <div class="tab-content active" id="content-gk-summary">
       <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
         <button class="btn btn-primary" onclick="openAssignmentModal()">+ New</button>
       </div>
       <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:16px;flex-wrap:wrap">
         <div class="form-group" style="min-width:160px;margin-bottom:0">
           <label>Currency</label>
-          <button class="trigger-btn" id="btn-currency-search" onclick="openModal('currency','search')">
-            <span class="selected-tags" id="currency-tags-search"><span class="placeholder">Select currencies...</span></span>
+          <button class="trigger-btn" id="btn-currency-gks" onclick="openModal('currency','gks')">
+            <span class="selected-tags" id="currency-tags-gks"><span class="placeholder">Select currencies...</span></span>
             <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
         </div>
         <div class="form-group" style="min-width:160px;margin-bottom:0">
           <label>Website</label>
-          <button class="trigger-btn" id="btn-website-search" onclick="openModal('website','search')">
-            <span class="selected-tags" id="website-tags-search"><span class="placeholder">Select websites...</span></span>
+          <button class="trigger-btn" id="btn-website-gks" onclick="openModal('website','gks')">
+            <span class="selected-tags" id="website-tags-gks"><span class="placeholder">Select websites...</span></span>
             <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
         </div>
-        <button class="btn btn-primary" onclick="doAssignmentSearch()">Search</button>
-        <button class="btn btn-reset" onclick="resetAssignmentSearch()">Reset</button>
+        <div class="form-group" style="min-width:120px;margin-bottom:0">
+          <label>Status</label>
+          <select class="status-select" id="gks-status-filter" style="height:36px">
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="offline">Offline</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="doGkSummarySearch()">Search</button>
+        <button class="btn btn-reset" onclick="resetGkSummarySearch()">Reset</button>
       </div>
-      <div id="assignment-results-area">
+      <div id="gk-summary-area">
         <div class="empty-state">
           <div class="empty-icon">📋</div>
-          <p>No promotion assignments yet. Click "+ New" to add one.</p>
+          <p>No data yet.</p>
         </div>
       </div>
-    </div>
-
-    <!-- GROUP KEY USAGE TAB -->
-    <div class="tab-content" id="content-groupkey">
-      <div class="section-title" style="margin-bottom:18px">Group Key Usage Overview</div>
-      <div id="groupkey-usage-area"></div>
     </div>
 
   </div>
@@ -747,6 +760,23 @@
   </div>
 </div>
 
+<!-- Tab4 Field Edit Modal -->
+<div class="modal-overlay" id="modal-gk2-field" style="z-index:1100">
+  <div class="modal" style="width:480px;max-height:85vh">
+    <div class="modal-header">
+      <span class="modal-title" id="gk2-modal-title">Edit Field</span>
+      <button class="modal-close" onclick="closeGk2Modal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="gk2-modal-body" style="overflow-y:auto"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeGk2Modal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveGk2Modal()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container"></div>
 
 <script>
@@ -754,6 +784,16 @@
 const CURRENCIES = ['SGD','MYR','HKD','CNY','JPY','AUD','IDR','USD','KRW','THB','TWD','VND','NZD','PTI','PTV','INR','PHP','EUR','MNT','RUB','MMK','AED'];
 const WEBSITES = ['A01 website','A02 website','A03 website','A04 website','A05 website','A06 website','A07 website','A08 website','A09 website','A010 website','B01 website','B02 website','B03 website','B04 website','B05 website'];
 const GROUPKEYS = ['group02','group03','group04','group05','group06','group07','group08','group09','group10'];
+
+// Standalone tag store keyed by groupKey
+const groupKeyTags = {
+  group02: 'VIP Tables',
+  group03: 'TOP Game',
+  group04: 'SuperSexy',
+  group05: 'Asia Hall',
+};
+function getGkTag(gk) { return groupKeyTags[gk] || ''; }
+function setGkTag(gk, tag) { groupKeyTags[gk] = tag; }
 
 function genTables(prefix, start, end) {
   const arr = [];
@@ -782,7 +822,8 @@ let state = {
   search: { currencies: [...CURRENCIES], websites: [...WEBSITES] },
   edit: { id: null, currencies: [], websites: [], groupKey: '', gameTables: {}, sortOrder: [] },
   assignment: { currencies: [], websites: [] },
-  ea: { currencies: [], websites: [] }
+  ea: { currencies: [], websites: [] },
+  gks: { currencies: [], websites: [] }
 };
 
 // Promotion Assignments data
@@ -821,7 +862,7 @@ function switchTab(tab) {
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('content-'+tab).classList.add('active');
   if(tab === 'add') renderGamesGrid('add');
-  if(tab === 'groupkey') renderGroupKeyUsage();
+  if(tab === 'gk-summary') renderGkSummary();
 }
 
 // ===================== RENDER GAMES GRID =====================
@@ -849,7 +890,7 @@ function renderGamesGrid(ctx) {
 function openModal(type, ctx) {
   modalCtx.type = type;
   modalCtx.context = ctx;
-  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : (ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : state.add)));
+  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : (ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : (ctx === 'gks' ? state.gks : state.add))));
   if(type === 'groupkey') {
     modalCtx.tempSelected = gs.groupKey ? [gs.groupKey] : [];
   } else {
@@ -883,7 +924,7 @@ function renderCheckList(type, selected, filter='') {
     document.getElementById(type+'-list').innerHTML = html;
   } else {
     // Check if the OTHER type already has 'default' selected → lock this list to default-only
-    const gs = ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : null);
+    const gs = ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : (ctx === 'gks' ? state.gks : null));
     const otherType = type === 'currency' ? 'websites' : 'currencies';
     const otherHasDefault = gs && gs[otherType] && gs[otherType].includes('default');
     const thisHasDefault = selected.includes('default');
@@ -974,7 +1015,7 @@ function toggleItem(type, item, checked) {
 
 function confirmModal(type) {
   const ctx = modalCtx.context;
-  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : (ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : state.add)));
+  const gs = ctx === 'search' ? state.search : (ctx === 'edit' ? state.edit : (ctx === 'assignment' ? state.assignment : (ctx === 'ea' ? state.ea : (ctx === 'gks' ? state.gks : state.add))));
   
   if(type === 'groupkey') {
     gs.groupKey = modalCtx.tempSelected[0] || '';
@@ -1378,11 +1419,26 @@ function confirmDelete() {
   if(window._deleteGroupKeyMode && deleteGroupKeyTarget) {
     promotionAssignments = promotionAssignments.filter(r => r.groupKey !== deleteGroupKeyTarget);
     const gk = deleteGroupKeyTarget;
+    const src = window._deleteGroupKeySource;
     deleteGroupKeyTarget = null;
     window._deleteGroupKeyMode = false;
+    window._deleteGroupKeySource = null;
     closeModal('confirm');
     showToast(`All records for ${gk} deleted.`, 'success');
-    renderGroupKeyUsage();
+    if(src === 'tab4') renderGroupKey2();
+    else if(src === 'tab5') renderGkSummary();
+    else renderGroupKeyUsage();
+    return;
+  }
+  if(window._deleteGkCurTarget) {
+    const { gk, currency } = window._deleteGkCurTarget;
+    promotionAssignments = promotionAssignments.filter(r => !(r.groupKey === gk && r.currency === currency));
+    window._deleteGkCurTarget = null;
+    window._deleteGroupKeyMode = false;
+    window._deleteGroupKeySource = null;
+    closeModal('confirm');
+    showToast(`Deleted ${gk} / ${currency}.`, 'success');
+    renderGkSummary();
     return;
   }
   if(deleteAssignmentTargetId !== null && promotionAssignments.find(r => r.id === deleteAssignmentTargetId)) {
@@ -1390,7 +1446,7 @@ function confirmDelete() {
     deleteAssignmentTargetId = null;
     closeModal('confirm');
     showToast('Assignment deleted.', 'success');
-    renderAssignmentTable([], []);
+    refreshCurrentTab();
     return;
   }
   savedData = savedData.filter(d => d.id !== deleteTargetId);
@@ -1640,15 +1696,17 @@ function saveAssignment() {
 
   closeAssignmentModal();
   showToast('Promotion assignment created successfully!', 'success');
-  renderAssignmentTable([], []);
+  refreshCurrentTab();
 }
 
 let editAssignmentTargetId = null;
+let editAssignmentGroupMode = null; // { gk, currency, ids }
 
 function openEditAssignmentModal(id) {
   const row = promotionAssignments.find(r => r.id === id);
   if(!row) return;
   editAssignmentTargetId = id;
+  editAssignmentGroupMode = null;
 
   // Populate ea state
   state.ea = {
@@ -1671,17 +1729,43 @@ function openEditAssignmentModal(id) {
   document.getElementById('modal-edit-assignment').classList.add('open');
 }
 
+function openEditAssignmentModalGroup(gk, currency) {
+  // Find all records for this gk+currency combo
+  const records = promotionAssignments.filter(r => r.groupKey === gk && r.currency === currency);
+  if(!records.length) return;
+
+  const websites = [...new Set(records.map(r => r.website))];
+  const allSt = records.map(r => r.status);
+  const sharedStatus = allSt.includes('active') ? 'active' : allSt.includes('inactive') ? 'inactive' : allSt[0] || 'inactive';
+
+  editAssignmentTargetId = records[0].id;
+  editAssignmentGroupMode = { gk, currency, ids: records.map(r => r.id) };
+
+  state.ea = { currencies: [currency], websites };
+  updateTriggerBtn('currency', 'ea', [currency]);
+  updateTriggerBtn('website', 'ea', websites);
+
+  ['currency','website'].forEach(f => {
+    const el = document.getElementById(`err-${f}-ea`);
+    if(el) el.classList.remove('show');
+    const btn = document.getElementById(`btn-${f}-ea`);
+    if(btn) btn.classList.remove('invalid');
+  });
+
+  document.getElementById('ea-groupkey').value = gk;
+  document.getElementById('ea-status').value = sharedStatus;
+  document.getElementById('modal-edit-assignment').classList.add('open');
+}
+
 function closeEditAssignmentModal() {
   document.getElementById('modal-edit-assignment').classList.remove('open');
 }
 
 function saveEditAssignment() {
-  const row = promotionAssignments.find(r => r.id === editAssignmentTargetId);
-  if(!row) return;
   const newGroupKey = document.getElementById('ea-groupkey').value;
-  const newStatus = document.getElementById('ea-status').value;
+  const newStatus   = document.getElementById('ea-status').value;
   const newCurrencies = state.ea.currencies;
-  const newWebsites = state.ea.websites;
+  const newWebsites   = state.ea.websites;
 
   // Validate
   let valid = true;
@@ -1697,55 +1781,88 @@ function saveEditAssignment() {
   }
   if(!valid) return;
 
-  // Only check conflict when saving as active
-  if(newStatus === 'active') {
-    const conflicts = [];
+  const now = new Date();
+
+  if(editAssignmentGroupMode) {
+    // Group mode: replace all records for this gk+currency with new set
+    const { ids } = editAssignmentGroupMode;
+    const excludeIds = new Set(ids);
+
+    // Conflict check
+    if(newStatus === 'active') {
+      const conflicts = [];
+      newCurrencies.forEach(cur => {
+        newWebsites.forEach(web => {
+          const conflict = promotionAssignments.find(r =>
+            !excludeIds.has(r.id) && r.currency === cur && r.website === web &&
+            r.groupKey === newGroupKey && r.status === 'active'
+          );
+          if(conflict) conflicts.push(`${cur} / ${web} / ${newGroupKey}`);
+        });
+      });
+      if(conflicts.length) { showToast(`Active record already exists: ${conflicts[0]}`, 'error'); return; }
+    }
+
+    // Remove old records
+    promotionAssignments = promotionAssignments.filter(r => !excludeIds.has(r.id));
+
+    // Create new records for each cur × web
     newCurrencies.forEach(cur => {
       newWebsites.forEach(web => {
-        const conflict = checkAssignmentConflict(row.id, cur, web, newGroupKey);
-        if(conflict) conflicts.push(`${cur} / ${web} / ${newGroupKey}`);
-      });
-    });
-    if(conflicts.length) {
-      showToast(`Active record already exists: ${conflicts[0]}`, 'error');
-      return;
-    }
-  }
-
-  // If multiple currency×website combos, create new rows for extras and update current
-  const now = new Date();
-  let first = true;
-  newCurrencies.forEach(cur => {
-    newWebsites.forEach(web => {
-      if(first) {
-        row.currency = cur;
-        row.website = web;
-        row.groupKey = newGroupKey;
-        row.status = newStatus;
-        row.isDefault = (cur === 'default' || web === 'default') || undefined;
-        row.lastEditor = 'Admin';
-        row.lastEditedTime = now;
-        first = false;
-      } else {
         const isDefaultRecord = cur === 'default' || web === 'default';
         promotionAssignments.push({
           id: Date.now() + Math.random(),
           promotionId: generatePromotionId(),
-          currency: cur,
-          website: web,
-          groupKey: newGroupKey,
-          status: newStatus,
+          currency: cur, website: web, groupKey: newGroupKey, status: newStatus,
           ...(isDefaultRecord ? { isDefault: true } : {}),
-          lastEditor: 'Admin',
-          lastEditedTime: now
+          lastEditor: 'Admin', lastEditedTime: now
         });
-      }
+      });
     });
-  });
+
+  } else {
+    // Single record mode
+    const row = promotionAssignments.find(r => r.id === editAssignmentTargetId);
+    if(!row) return;
+
+    if(newStatus === 'active') {
+      const conflicts = [];
+      newCurrencies.forEach(cur => {
+        newWebsites.forEach(web => {
+          const conflict = checkAssignmentConflict(row.id, cur, web, newGroupKey);
+          if(conflict) conflicts.push(`${cur} / ${web} / ${newGroupKey}`);
+        });
+      });
+      if(conflicts.length) { showToast(`Active record already exists: ${conflicts[0]}`, 'error'); return; }
+    }
+
+    let first = true;
+    newCurrencies.forEach(cur => {
+      newWebsites.forEach(web => {
+        if(first) {
+          row.currency = cur; row.website = web; row.groupKey = newGroupKey;
+          row.status = newStatus;
+          row.isDefault = (cur === 'default' || web === 'default') || undefined;
+          row.lastEditor = 'Admin'; row.lastEditedTime = now;
+          first = false;
+        } else {
+          const isDefaultRecord = cur === 'default' || web === 'default';
+          promotionAssignments.push({
+            id: Date.now() + Math.random(), promotionId: generatePromotionId(),
+            currency: cur, website: web, groupKey: newGroupKey, status: newStatus,
+            ...(isDefaultRecord ? { isDefault: true } : {}),
+            lastEditor: 'Admin', lastEditedTime: now
+          });
+        }
+      });
+    });
+  }
+
+  editAssignmentGroupMode = null;
 
   closeEditAssignmentModal();
   showToast('Assignment updated successfully!', 'success');
-  renderAssignmentTable([], []);
+  refreshCurrentTab();
 }
 
 function setAssignmentOffline(id) {
@@ -1755,7 +1872,7 @@ function setAssignmentOffline(id) {
   row.lastEditor = 'Admin';
   row.lastEditedTime = new Date();
   showToast('Assignment set to offline.', 'success');
-  renderAssignmentTable([], []);
+  refreshCurrentTab();
 }
 
 let deleteAssignmentTargetId = null;
@@ -1766,9 +1883,14 @@ function confirmDeleteAssignment(id) {
   document.getElementById('modal-confirm').classList.add('open');
 }
 
+function refreshCurrentTab() {
+  const activeTab = document.querySelector('.tab.active')?.id?.replace('tab-', '');
+  if(activeTab === 'gk-summary') renderGkSummary();
+  else renderAssignmentTable([], []);
+}
+
 function getTagByGroupKey(groupKey) {
-  const match = savedData.find(d => !d.isDefault && d.groupKey === groupKey);
-  return (match && match.tag) ? match.tag : '-';
+  return getGkTag(groupKey) || '-';
 }
 
 function renderAssignmentTable(currencies, websites) {
@@ -1830,15 +1952,12 @@ function renderGroupKeyUsage() {
   const area = document.getElementById('groupkey-usage-area');
   if(!area) return;
 
-  // Group assignments by groupKey
   const map = {};
   promotionAssignments.forEach(row => {
     const key = row.groupKey;
     if(!map[key]) map[key] = [];
     map[key].push(row);
   });
-
-  // Also include groupkeys that exist in savedData but have no assignments
   GROUPKEYS.forEach(gk => { if(!map[gk]) map[gk] = []; });
 
   const sortedKeys = Object.keys(map).sort();
@@ -1848,59 +1967,32 @@ function renderGroupKeyUsage() {
     return;
   }
 
-  // Build table rows — one row per groupKey
+  const statusLabel = { active:'Active', inactive:'Inactive', offline:'Offline' };
+  const statusCls   = { active:'gku-status-active', inactive:'gku-status-inactive', offline:'gku-status-offline' };
+
   const rows = sortedKeys.map(gk => {
     const records = map[gk];
-
-    // Unique currencies used by this groupKey
     const currencies = [...new Set(records.map(r => r.currency))];
-
-    // Websites with usage count
-    const webCountMap = {};
-    records.forEach(r => {
-      if(!webCountMap[r.website]) webCountMap[r.website] = 0;
-      webCountMap[r.website]++;
-    });
-    const websites = Object.entries(webCountMap).sort((a,b) => b[1]-a[1]);
-
-    // Status summary per record
-    const statuses = [...new Set(records.map(r => r.status))];
-
-    // Last editor
-    const lastEditorRecord = [...records].sort((a,b) => (b.lastEditedTime||0) - (a.lastEditedTime||0))[0];
+    const websites   = [...new Set(records.map(r => r.website))];
+    const allStatuses = records.map(r => r.status);
+    const sharedStatus = allStatuses.includes('active') ? 'active' : allStatuses.includes('inactive') ? 'inactive' : allStatuses[0] || 'inactive';
+    const tag = getGkTag(gk);
+    const lastEditorRecord = [...records].sort((a,b)=>(b.lastEditedTime||0)-(a.lastEditedTime||0))[0];
     const lastEditor = lastEditorRecord ? lastEditorRecord.lastEditor : '—';
-
-    // Tag from savedData
-    const tagInfo = savedData.find(d => d.groupKey === gk && !d.isDefault);
-    const tag = tagInfo ? tagInfo.tag : '—';
-
-    // Total usage count
-    const totalCount = records.length;
-
-    // Currency badges
-    const currencyHTML = currencies.length
-      ? currencies.map(c => `<span class="gku-currency-badge">${c}</span>`).join('')
-      : `<span style="color:var(--text-light);font-size:12px">—</span>`;
-
-    // Website rows
-    const websiteHTML = websites.length
-      ? websites.map(([web, cnt]) => `
-          <div class="gku-website-row">
-            <span class="gku-website-name">${web}</span>
-          </div>`).join('')
-      : `<span style="color:var(--text-light);font-size:12px">—</span>`;
-
-    // Status badges
-    const statusHTML = statuses.length
-      ? statuses.map(s => {
-          const cls = `gku-status-${s}`;
-          const label = {active:'Active',inactive:'Inactive',offline:'Offline'}[s] || s;
-          return `<span class="gku-status-badge ${cls}">${label}</span>`;
-        }).join('')
-      : `<span style="color:var(--text-light);font-size:12px">—</span>`;
-
-    // Action buttons (Edit/Group Off/Delete) — mirroring the reference image
     const isAnyActive = records.some(r => r.status === 'active');
+
+    const currencyHTML = currencies.length === 0
+      ? `<span style="color:var(--text-light);font-size:12px">—</span>`
+      : currencies.length === CURRENCIES.length
+        ? `<span class="gku-currency-badge" style="background:#eff6ff;color:#1d4ed8">All</span>`
+        : currencies.map(c=>`<span class="gku-currency-badge">${c}</span>`).join('');
+
+    const websiteHTML = websites.length === 0
+      ? `<span style="color:var(--text-light);font-size:12px">—</span>`
+      : websites.length === WEBSITES.length
+        ? `<span class="gku-currency-badge" style="background:#f0fdf4;color:#065f46">All</span>`
+        : websites.map(w=>`<div class="gku-website-name">${w}</div>`).join('');
+
     const editBtn = `<button class="btn btn-outline btn-sm" onclick="openGkuEditModal('${gk}')">Edit</button>`;
     const groupOffBtn = isAnyActive
       ? `<button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border-color:#fde68a" onclick="groupOffByKey('${gk}')">Group Off</button>`
@@ -1912,11 +2004,11 @@ function renderGroupKeyUsage() {
     return `<tr>
       <td>
         <div class="gku-cell-key">${gk}</div>
-        <div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">${tag !== '—' ? tag : ''}</div>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">${tag}</div>
       </td>
       <td><div class="gku-currency-list">${currencyHTML}</div></td>
       <td><div class="gku-website-col">${websiteHTML}</div></td>
-      <td><div class="gku-status-col">${statusHTML}</div></td>
+      <td><span class="gku-status-badge ${statusCls[sharedStatus]||''}">${statusLabel[sharedStatus]||sharedStatus}</span></td>
       <td><div class="gku-action-col">${editBtn}${groupOffBtn}${deleteBtn}</div></td>
       <td class="gku-editor-col">${lastEditor}</td>
     </tr>`;
@@ -1958,13 +2050,313 @@ function confirmDeleteGroupKey(gk) {
   window._deleteGroupKeyMode = true;
 }
 
+// ===================== GROUP KEY DETAIL (TAB 4) =====================
+function renderGroupKey2() {
+  const area = document.getElementById('groupkey2-area');
+  if(!area) return;
+
+  const map = {};
+  promotionAssignments.forEach(row => {
+    const key = row.groupKey;
+    if(!map[key]) map[key] = [];
+    map[key].push(row);
+  });
+  GROUPKEYS.forEach(gk => { if(!map[gk]) map[gk] = []; });
+
+  const sortedKeys = Object.keys(map).sort();
+
+  if(!sortedKeys.length) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">🔑</div><p>No group key data available.</p></div>`;
+    return;
+  }
+
+  const rows = sortedKeys.map(gk => {
+    const records = map[gk];
+    const tag = getGkTag(gk);
+    const currencies = [...new Set(records.map(r => r.currency))];
+    const websites = [...new Set(records.map(r => r.website))];
+    // Shared status: active > inactive > offline
+    const allStatuses = records.map(r => r.status);
+    const sharedStatus = allStatuses.includes('active') ? 'active' : allStatuses.includes('inactive') ? 'inactive' : allStatuses[0] || 'inactive';
+    const lastEditorRecord = [...records].sort((a,b)=>(b.lastEditedTime||0)-(a.lastEditedTime||0))[0];
+    const lastEditor = lastEditorRecord ? lastEditorRecord.lastEditor : '—';
+
+    const currencyHTML = currencies.length === 0
+      ? `<span style="color:var(--text-light);font-size:12px">—</span>`
+      : currencies.length === CURRENCIES.length
+        ? `<span class="gku-currency-badge" style="background:#eff6ff;color:#1d4ed8">All</span>`
+        : currencies.map(c => `<span class="gku-currency-badge">${c}</span>`).join('');
+
+    const websiteHTML = websites.length === 0
+      ? `<span style="color:var(--text-light);font-size:12px">—</span>`
+      : websites.length === WEBSITES.length
+        ? `<span class="gku-currency-badge" style="background:#f0fdf4;color:#065f46">All</span>`
+        : websites.map(w => `<div class="gku-website-name">${w}</div>`).join('');
+
+    const statusColor = { active:'#d1fae5;color:#065f46', inactive:'#f3f4f6;color:#6b7280', offline:'#fee2e2;color:#991b1b' };
+    const statusLabel = { active:'Active', inactive:'Inactive', offline:'Offline' };
+
+    const isAnyActive = records.some(r => r.status === 'active');
+    const deleteBtn = isAnyActive
+      ? `<button class="btn btn-sm btn-disabled" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5;opacity:0.4" disabled title="Cannot delete while Active">Delete</button>`
+      : `<button class="btn btn-sm" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" onclick="confirmDeleteGroupKey2('${gk}')">Delete</button>`;
+
+    return `<tr id="gk2-row-${gk}">
+      <td>
+        <div class="gku-cell-key">${gk}</div>
+        <button class="gk2-edit-btn" style="margin-top:5px" onclick="openGk2Modal('key','${gk}')">Edit</button>
+      </td>
+      <td>
+        <div id="gk2-tag-display-${gk}" style="font-size:13px;color:var(--text)">${tag || '<span style="color:var(--text-light)">—</span>'}</div>
+      </td>
+      <td>
+        <div class="gku-currency-list" id="gk2-currency-display-${gk}">${currencyHTML}</div>
+        <button class="gk2-edit-btn" style="margin-top:5px" onclick="openGk2Modal('currency','${gk}')">Edit</button>
+      </td>
+      <td>
+        <div class="gku-website-col" id="gk2-website-display-${gk}">${websiteHTML}</div>
+        <button class="gk2-edit-btn" style="margin-top:5px" onclick="openGk2Modal('website','${gk}')">Edit</button>
+      </td>
+      <td>
+        <span class="gku-status-badge gku-status-${sharedStatus}" id="gk2-status-display-${gk}">${statusLabel[sharedStatus]||sharedStatus}</span>
+        <button class="gk2-edit-btn" style="margin-top:5px;display:block" onclick="openGk2Modal('status','${gk}')">Edit</button>
+      </td>
+      <td><div class="gku-action-col">${deleteBtn}</div></td>
+      <td class="gku-editor-col">${lastEditor}</td>
+    </tr>`;
+  });
+
+  area.innerHTML = `<div style="overflow-x:auto"><table class="gku-table">
+    <thead><tr>
+      <th>Group Key</th>
+      <th>Tag</th>
+      <th>Currency</th>
+      <th>Website</th>
+      <th>Status</th>
+      <th>Actions</th>
+      <th>User Editor</th>
+    </tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table></div>`;
+}
+
+// ===================== TAB 4 FIELD EDIT MODAL =====================
+let gk2ModalState = { field: null, gk: null, tempList: [] };
+
+function openGk2Modal(field, gk) {
+  gk2ModalState.field = field;
+  gk2ModalState.gk = gk;
+  const records = promotionAssignments.filter(r => r.groupKey === gk);
+  const tagInfo = getGkTag(gk);
+  const allStatuses = records.map(r => r.status);
+  const sharedStatus = allStatuses.includes('active') ? 'active' : allStatuses.includes('inactive') ? 'inactive' : allStatuses[0] || 'inactive';
+
+  const fieldLabel = { key:'Group Key', tag:'Tag', currency:'Currency', website:'Website', status:'Status' };
+  document.getElementById('gk2-modal-title').textContent = `Edit ${fieldLabel[field]} — ${gk}`;
+
+  const body = document.getElementById('gk2-modal-body');
+
+  if(field === 'key') {
+    body.innerHTML = `<div class="form-group">
+      <label>Group Key</label>
+      <select class="status-select" id="gk2m-key-select">
+        ${GROUPKEYS.map(k=>`<option value="${k}" ${k===gk?'selected':''}>${k}</option>`).join('')}
+      </select>
+    </div>`;
+
+  } else if(field === 'tag') {
+    body.innerHTML = `<div class="form-group">
+      <label>Tag</label>
+      <input type="text" class="status-select" id="gk2m-tag-input" value="${tagInfo}" maxlength="30" placeholder="最多共可輸入30個字">
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">最多共可輸入30個字</div>
+    </div>`;
+
+  } else if(field === 'currency') {
+    const cur = [...new Set(records.map(r => r.currency))];
+    gk2ModalState.tempList = [...cur];
+    body.innerHTML = `
+      <input class="check-search" type="text" placeholder="Search currency..." oninput="filterGk2List('currency',this.value)">
+      <div class="check-list" id="gk2m-currency-list"></div>`;
+    renderGk2CheckList('currency', gk2ModalState.tempList, '');
+
+  } else if(field === 'website') {
+    const web = [...new Set(records.map(r => r.website))];
+    gk2ModalState.tempList = [...web];
+    body.innerHTML = `
+      <input class="check-search" type="text" placeholder="Search website..." oninput="filterGk2List('website',this.value)">
+      <div class="check-list" id="gk2m-website-list"></div>`;
+    renderGk2CheckList('website', gk2ModalState.tempList, '');
+
+  } else if(field === 'status') {
+    body.innerHTML = `<div class="form-group">
+      <label>Status</label>
+      <select class="status-select" id="gk2m-status-select">
+        <option value="active" ${sharedStatus==='active'?'selected':''}>Active</option>
+        <option value="inactive" ${sharedStatus==='inactive'?'selected':''}>Inactive</option>
+        <option value="offline" ${sharedStatus==='offline'?'selected':''}>Offline</option>
+      </select>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px">This status applies to all currency × website combinations under this Group Key.</div>
+    </div>`;
+  }
+
+  document.getElementById('modal-gk2-field').classList.add('open');
+}
+
+function renderGk2CheckList(type, selected, filter) {
+  const baseItems = type === 'currency' ? CURRENCIES : WEBSITES;
+  const visible = filter ? baseItems.filter(i => i.toLowerCase().includes(filter)) : baseItems;
+  const listId = type === 'currency' ? 'gk2m-currency-list' : 'gk2m-website-list';
+  const el = document.getElementById(listId);
+  if(!el) return;
+  const allChecked = visible.length > 0 && visible.every(i => selected.includes(i));
+  const idPfx = type === 'currency' ? 'gk2mc' : 'gk2mw';
+  const idKey = i => `${idPfx}-${i.replace(/\s/g,'_')}`;
+
+  let html = '';
+
+  // default option for currency only (at top, separated)
+  if(type === 'currency') {
+    const defChecked = selected.includes('default');
+    html += `<div class="check-item" style="border-bottom:1px solid var(--border);margin-bottom:6px;padding-bottom:6px">
+      <input type="checkbox" id="gk2mc-default" ${defChecked?'checked':''} onchange="gk2ToggleItem('currency','default',this.checked,'${filter}')">
+      <label for="gk2mc-default" style="font-weight:600">default</label>
+    </div>`;
+  }
+
+  html += `<div class="check-all"><div class="check-item">
+    <input type="checkbox" id="${idPfx}-all" ${allChecked?'checked':''} onchange="gk2ToggleAll('${type}','${filter}')">
+    <label for="${idPfx}-all">Select All${filter?' (filtered)':''}</label>
+  </div></div>`;
+  html += visible.map(i => `<div class="check-item">
+    <input type="checkbox" id="${idKey(i)}" ${selected.includes(i)?'checked':''} onchange="gk2ToggleItem('${type}','${i}',this.checked,'${filter}')">
+    <label for="${idKey(i)}">${i}</label>
+  </div>`).join('');
+  el.innerHTML = html;
+}
+
+function filterGk2List(type, val) {
+  renderGk2CheckList(type, gk2ModalState.tempList, val.toLowerCase());
+}
+
+function gk2ToggleAll(type, filter) {
+  const items = type === 'currency' ? CURRENCIES : WEBSITES;
+  const visible = filter ? items.filter(i => i.toLowerCase().includes(filter)) : items;
+  const idPfx = type === 'currency' ? 'gk2mc' : 'gk2mw';
+  const checked = document.getElementById(`${idPfx}-all`).checked;
+  if(checked) visible.forEach(i => { if(!gk2ModalState.tempList.includes(i)) gk2ModalState.tempList.push(i); });
+  else gk2ModalState.tempList = gk2ModalState.tempList.filter(i => !visible.includes(i));
+  renderGk2CheckList(type, gk2ModalState.tempList, filter);
+}
+
+function gk2ToggleItem(type, item, checked, filter) {
+  if(checked && !gk2ModalState.tempList.includes(item)) gk2ModalState.tempList.push(item);
+  else if(!checked) gk2ModalState.tempList = gk2ModalState.tempList.filter(i => i !== item);
+  renderGk2CheckList(type, gk2ModalState.tempList, filter);
+}
+
+function closeGk2Modal() {
+  document.getElementById('modal-gk2-field').classList.remove('open');
+}
+
+function saveGk2Modal() {
+  const { field, gk } = gk2ModalState;
+  const now = new Date();
+  const records = promotionAssignments.filter(r => r.groupKey === gk);
+
+  if(field === 'key') {
+    const newGk = document.getElementById('gk2m-key-select').value;
+    const oldTag = getGkTag(gk);
+    records.forEach(r => { r.groupKey = newGk; r.lastEditor = 'Admin'; r.lastEditedTime = now; });
+    if(newGk !== gk) { setGkTag(newGk, oldTag); delete groupKeyTags[gk]; }
+    showToast('Group Key updated.', 'success');
+
+  } else if(field === 'tag') {
+    const newTag = document.getElementById('gk2m-tag-input').value.trim();
+    setGkTag(gk, newTag);
+    showToast('Tag updated.', 'success');
+
+  } else if(field === 'status') {
+    const newStatus = document.getElementById('gk2m-status-select').value;
+    records.forEach(r => { r.status = newStatus; r.lastEditor = 'Admin'; r.lastEditedTime = now; });
+    showToast('Status updated.', 'success');
+
+  } else if(field === 'currency') {
+    const selected = gk2ModalState.tempList;
+    const currentWebs = [...new Set(records.map(r => r.website))];
+    records.filter(r => !selected.includes(r.currency))
+      .forEach(r => { promotionAssignments = promotionAssignments.filter(x => x.id !== r.id); });
+    selected.forEach(cur => {
+      currentWebs.forEach(web => {
+        if(!promotionAssignments.find(r => r.groupKey===gk && r.currency===cur && r.website===web))
+          promotionAssignments.push({ id:Date.now()+Math.random(), promotionId:generatePromotionId(), currency:cur, website:web, groupKey:gk, status:records[0]?.status||'inactive', lastEditor:'Admin', lastEditedTime:now });
+      });
+    });
+    showToast('Currency updated.', 'success');
+
+  } else if(field === 'website') {
+    const selected = gk2ModalState.tempList;
+    const currentCurs = [...new Set(records.map(r => r.currency))];
+    records.filter(r => !selected.includes(r.website))
+      .forEach(r => { promotionAssignments = promotionAssignments.filter(x => x.id !== r.id); });
+    selected.forEach(web => {
+      currentCurs.forEach(cur => {
+        if(!promotionAssignments.find(r => r.groupKey===gk && r.currency===cur && r.website===web))
+          promotionAssignments.push({ id:Date.now()+Math.random(), promotionId:generatePromotionId(), currency:cur, website:web, groupKey:gk, status:records[0]?.status||'inactive', lastEditor:'Admin', lastEditedTime:now });
+      });
+    });
+    showToast('Website updated.', 'success');
+  }
+
+  closeGk2Modal();
+  renderGroupKey2();
+}
+
+function setGroupOffline(gk, currency) {
+  const now = new Date();
+  promotionAssignments.forEach(r => {
+    if(r.groupKey === gk && r.currency === currency && r.status === 'active') {
+      r.status = 'offline';
+      r.lastEditor = 'Admin';
+      r.lastEditedTime = now;
+    }
+  });
+  showToast('Set to offline.', 'success');
+  refreshCurrentTab();
+}
+
+function confirmDeleteGkCurrency(gk, currency) {
+  const count = promotionAssignments.filter(r => r.groupKey === gk && r.currency === currency).length;
+  document.getElementById('confirm-delete-label').textContent = `all ${count} record(s) for ${gk} / ${currency}`;
+  window._deleteGroupKeyMode = true;
+  window._deleteGroupKeySource = 'tab5-cur';
+  window._deleteGkCurTarget = { gk, currency };
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function confirmDeleteGkGroup(gk) {
+  deleteGroupKeyTarget = gk;
+  const count = promotionAssignments.filter(r => r.groupKey === gk).length;
+  document.getElementById('confirm-delete-label').textContent = `all ${count} record(s) for group key "${gk}"`;
+  window._deleteGroupKeyMode = true;
+  window._deleteGroupKeySource = 'tab5';
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function confirmDeleteGroupKey2(gk) {
+  deleteGroupKeyTarget = gk;
+  const count = promotionAssignments.filter(r => r.groupKey === gk).length;
+  document.getElementById('confirm-delete-label').textContent = `all ${count} record(s) for ${gk}`;
+  window._deleteGroupKeyMode = true;
+  window._deleteGroupKeySource = 'tab4';
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
 // ===================== GKU EDIT MODAL =====================
 let gkuEditState = { gk: null, tag: '', status: 'inactive', currencies: [], websites: [], tempCurrencies: [], tempWebsites: [] };
 
 function openGkuEditModal(gk) {
   const records = promotionAssignments.filter(r => r.groupKey === gk);
-  const tagInfo = savedData.find(d => d.groupKey === gk && !d.isDefault);
-  const tag = tagInfo ? tagInfo.tag : '';
+  const tag = getGkTag(gk);
 
   // Aggregate currencies and websites used by this group key
   const currencies = [...new Set(records.map(r => r.currency).filter(c => c !== 'default'))];
@@ -2081,9 +2473,12 @@ function saveGkuEdit() {
   const newTag = document.getElementById('gku-edit-tag').value.trim();
   const newStatus = document.getElementById('gku-edit-status').value;
 
-  // Update tag in savedData
-  const sd = savedData.find(d => d.groupKey === gk && !d.isDefault);
-  if(sd) { sd.tag = newTag; sd.groupKey = newGk; sd.lastEditor = 'Admin'; sd.lastEditedTime = new Date(); }
+  // Update tag in groupKeyTags
+  setGkTag(newGk, newTag);
+  if(newGk !== gk) {
+    groupKeyTags[newGk] = newTag;
+    delete groupKeyTags[gk];
+  }
 
   // Update groupKey and status on all records
   const now = new Date();
@@ -2099,6 +2494,150 @@ function saveGkuEdit() {
   closeGkuEditModal();
   showToast(`${gk} updated successfully.`, 'success');
   renderGroupKeyUsage();
+}
+
+// ===================== GROUP KEY SUMMARY (TAB 5) =====================
+function doGkSummarySearch() {
+  renderGkSummary();
+}
+
+function resetGkSummarySearch() {
+  state.gks = { currencies: [], websites: [] };
+  updateTriggerBtn('currency', 'gks', []);
+  updateTriggerBtn('website', 'gks', []);
+  document.getElementById('gks-status-filter').value = '';
+  renderGkSummary();
+}
+
+function renderGkSummary() {
+  const area = document.getElementById('gk-summary-area');
+  if(!area) return;
+
+  const filterCurrencies = state.gks.currencies;
+  const filterWebsites   = state.gks.websites;
+  const filterStatus     = document.getElementById('gks-status-filter')?.value || '';
+
+  const statusLabel = { active:'Active', inactive:'Inactive', offline:'Offline' };
+  const statusStyle  = { active:'background:#d1fae5;color:#065f46', inactive:'background:#f3f4f6;color:#6b7280', offline:'background:#fee2e2;color:#991b1b' };
+
+  // Group all assignments by groupKey
+  const map = {};
+  promotionAssignments.forEach(r => {
+    if(!map[r.groupKey]) map[r.groupKey] = [];
+    map[r.groupKey].push(r);
+  });
+
+  // Build one display-row per assignment record, but with group key info in first col
+  // Filter records
+  let filtered = promotionAssignments.filter(r => {
+    if(filterCurrencies.length && !filterCurrencies.includes(r.currency)) return false;
+    if(filterWebsites.length   && !filterWebsites.includes(r.website))   return false;
+    if(filterStatus            && r.status !== filterStatus)              return false;
+    return true;
+  });
+
+  // Sort: default rows first, then by groupKey
+  const defaultRows  = filtered.filter(r => r.isDefault).sort((a,b) => b.lastEditedTime - a.lastEditedTime);
+  const normalRows   = filtered.filter(r => !r.isDefault).sort((a,b) => a.groupKey.localeCompare(b.groupKey));
+  filtered = [...defaultRows, ...normalRows];
+
+  if(!filtered.length) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No matching records found.</p></div>`;
+    return;
+  }
+
+  // Track which groupKeys we've already rendered the first cell for (for rowspan look)
+  // We do real rowspan: group consecutive rows of same groupKey
+  // First build groups in order
+  const groupOrder = [];
+  const groupMap   = {};
+  filtered.forEach(r => {
+    if(!groupMap[r.groupKey]) {
+      groupMap[r.groupKey] = [];
+      groupOrder.push(r.groupKey);
+    }
+    groupMap[r.groupKey].push(r);
+  });
+
+  const rows = [];
+  groupOrder.forEach(gk => {
+    const gkRecords = groupMap[gk];
+    const tag = getGkTag(gk);
+
+    // Sub-group by currency within this gk
+    const curOrder = [];
+    const curMap   = {};
+    gkRecords.forEach(r => {
+      if(!curMap[r.currency]) { curMap[r.currency] = []; curOrder.push(r.currency); }
+      curMap[r.currency].push(r);
+    });
+
+    const isAnyActiveInGroup = gkRecords.some(r => r.status === 'active');
+    const groupDeleteBtn = isAnyActiveInGroup
+      ? `<button class="btn btn-sm btn-disabled" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5;opacity:0.4;margin-top:8px" disabled title="Cannot delete while Active">Delete</button>`
+      : `<button class="btn btn-sm" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5;margin-top:8px" onclick="confirmDeleteGkGroup('${gk}')">Delete</button>`;
+
+    const gkRowspan = curOrder.length;
+
+    curOrder.forEach((cur, curIdx) => {
+      const curRecords = curMap[cur];
+      const isGkFirst  = curIdx === 0;
+
+      // Collect websites for this gk+currency combo
+      const websites = [...new Set(curRecords.map(r => r.website))];
+      const webDisplay = websites.length === WEBSITES.length
+        ? `ALL`
+        : websites.map(w => `<span style="font-size:12px;color:var(--text)">${w}</span>`).join('<br>');
+
+      // Status: shared across this currency group (active > inactive > offline)
+      const allSt = curRecords.map(r => r.status);
+      const sharedStatus = allSt.includes('active') ? 'active' : allSt.includes('inactive') ? 'inactive' : allSt[0] || 'inactive';
+      const isActive = sharedStatus === 'active';
+      const lastEditorRecord = [...curRecords].sort((a,b)=>(b.lastEditedTime||0)-(a.lastEditedTime||0))[0];
+
+      const dis      = isActive ? ' btn-disabled' : '';
+      const disTitle = isActive ? `title="Cannot edit while Active"` : '';
+
+      // Edit opens first record in this group (or we could open a group edit)
+      const firstId = curRecords[0].id;
+      const editBtn = `<button class="btn btn-outline btn-sm${dis}" ${disTitle} onclick="${isActive ? `showToast('Cannot edit while Active','error')` : `openEditAssignmentModalGroup('${gk}','${cur}')`}">Edit</button>`;
+      const offlineBtn = isActive ? `<button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border-color:#fde68a" onclick="setGroupOffline('${gk}','${cur}')">Set Offline</button>` : '';
+      const deleteBtn  = `<button class="btn btn-sm${dis}" style="background:var(--danger-light);color:var(--danger);border-color:#fca5a5" ${disTitle} onclick="${isActive ? `showToast('Cannot delete while Active','error')` : `confirmDeleteGkCurrency('${gk}','${cur}')`}">Delete</button>`;
+
+      const isDefaultRow = curRecords.some(r => r.isDefault);
+      const trStyle = isDefaultRow ? ' style="background:#f0fdf4"' : '';
+
+      const gkCell = isGkFirst ? `
+        <td rowspan="${gkRowspan}" style="vertical-align:top;border-right:2px solid var(--border);padding:12px 14px;min-width:160px">
+          <div class="gku-cell-key" style="margin-bottom:6px">${gk}</div>
+          ${tag ? `<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:6px">${tag}</div>` : ''}
+          ${groupDeleteBtn}
+        </td>` : '';
+
+      rows.push(`<tr${trStyle}>
+        ${gkCell}
+        <td><span class="badge">${cur}</span></td>
+        <td style="font-size:13px;line-height:1.8">${webDisplay}</td>
+        <td><span class="status-badge" style="${statusStyle[sharedStatus]||''};border-radius:4px;padding:3px 9px;font-size:12px;font-weight:500;display:inline-flex;align-items:center">${statusLabel[sharedStatus]||sharedStatus}</span></td>
+        <td class="editor-cell">${lastEditorRecord?.lastEditor||'—'}</td>
+        <td class="time-cell">${formatTime(lastEditorRecord?.lastEditedTime)}</td>
+        <td><div class="action-cell">${editBtn}${offlineBtn}${deleteBtn}</div></td>
+      </tr>`);
+    });
+  });
+
+  area.innerHTML = `<div style="overflow-x:auto"><table class="results-table">
+    <thead><tr>
+      <th style="min-width:180px">Group Key</th>
+      <th>Currency</th>
+      <th>Website</th>
+      <th>Status</th>
+      <th>Last Editor</th>
+      <th>Last Edited Time</th>
+      <th>Actions</th>
+    </tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table></div>`;
 }
 
 // ===================== TOAST =====================
@@ -2133,7 +2672,7 @@ document.addEventListener('drop', function(e) {
   updateTriggerBtn('currency', 'search', []);
   updateTriggerBtn('website', 'search', []);
   renderAllResults();
-  renderAssignmentTable([], []);
+  renderGkSummary();
 })();
 </script>
 </body>
